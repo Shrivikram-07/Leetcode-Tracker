@@ -34,3 +34,6 @@ desktop.ini
 # Testing coverage
 coverage/
 .nyc_output/
+
+# AI snapshots
+.snapshots/
