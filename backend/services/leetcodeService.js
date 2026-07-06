@@ -1,6 +1,6 @@
 const axios = require("axios");
 
-const API_BASE_URL = "https://alfa-leetcode-api.onrender.com";
+const API_BASE_URL = process.env.LEETCODE_API_BASE_URL || "https://alfa-leetcode-api.onrender.com";
 
 // Server-side cache in-memory Map
 const cache = new Map();
