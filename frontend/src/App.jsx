@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-import login from "./pages/login";
+import Login from "./pages/login";
 import Register from "./pages/Register";
-import dashboard from "./pages/dashboard";
+import Dashboard from "./pages/dashboard";
 import Profile from "./pages/Profile";
 
 function App() {
