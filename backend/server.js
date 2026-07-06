@@ -14,7 +14,7 @@ app.use((req, res, next) => {
     const start = Date.now();
     res.on("finish", () => {
         const duration = Date.now() - start;
-        console.log(`[Request] ${req.method} ${req.originalUrl} - Status: ${res.statusCode} - Time: ${duration}ms`);
+        console.log(`[Request] ${req.method} ${req.originalUrl}  Status: ${res.statusCode}  Time: ${duration}ms - server.js:17`);
     });
     next();
 });
@@ -43,13 +43,8 @@ if (process.env.FRONTEND_URL) {
 }
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            callback(new Error("Not allowed by CORS"));
-        }
-    }
+    origin: https://leetcode-tracker-silk.vercel.app/,
+    credentials: true
 }));
 
 /* ---------------- BODY PARSER ---------------- */
@@ -75,9 +70,9 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT} - server.js:61`);
+    console.log(`Server running on port ${PORT} - server.js:73`);
 });
 
 server.on("error", (err) => {
-    console.log("SERVER ERROR: - server.js:65", err);
+    console.log("SERVER ERROR: - server.js:77", err);
 });
