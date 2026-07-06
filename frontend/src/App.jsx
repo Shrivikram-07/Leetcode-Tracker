@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 
-import Login from "./pages/login";
+import login from "./pages/login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/dashboard";
+import dashboard from "./pages/dashboard";
 import Profile from "./pages/Profile";
 
 function App() {
@@ -23,9 +23,9 @@ function App() {
       <Toaster position="top-center" />
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/Register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/Profile" element={<Profile />} />
       </Routes>
     </BrowserRouter>
   );
