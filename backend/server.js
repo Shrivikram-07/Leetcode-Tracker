@@ -43,7 +43,7 @@ if (process.env.FRONTEND_URL) {
 }
 
 app.use(cors({
-    origin: https://leetcode-tracker-silk.vercel.app/,
+    origin: https://leetcode-tracker-silk.vercel.app,
     credentials: true
 }));
 
