@@ -45,14 +45,14 @@ function ProblemCard({ problem, onDelete, onEdit }) {
         <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={() => onEdit(problem)}
-            className="bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center"
             title="Edit Problem"
           >
             Edit
           </button>
           <button
             onClick={() => onDelete(problem.id)}
-            className="bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
+            className="bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center"
             title="Delete Problem"
           >
             Delete

@@ -30,6 +30,14 @@ function Profile() {
   const [theme, setTheme] = useState(
     document.documentElement.getAttribute("data-theme") || "light"
   );
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
@@ -191,12 +199,12 @@ function Profile() {
                   value={connectUsername}
                   onChange={(e) => setConnectUsername(e.target.value)}
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
                 />
                 <button
                   type="submit"
                   disabled={isConnecting}
-                  className="w-full px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full px-5 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-base hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[48px] flex items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {isConnecting ? "Connecting..." : "Connect"}
                 </button>
@@ -218,25 +226,25 @@ function Profile() {
                        </span>
                     </div>
                  </div>
-                 <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
-                   <button
-                     onClick={handleSync}
-                     disabled={isSyncing}
-                     className="px-5 py-2.5 rounded-xl border border-[var(--accent)] text-[var(--accent)] font-bold text-sm bg-transparent hover:bg-[var(--accent-bg)] active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer flex-1 sm:flex-initial disabled:opacity-60"
-                   >
-                     {isSyncing ? "Syncing..." : "Sync with LeetCode"}
-                   </button>
-                   <button
-                     onClick={handleImport}
-                     disabled={isImporting}
-                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer flex-1 sm:flex-initial disabled:opacity-60"
-                   >
-                     {isImporting ? "Importing..." : "Import My LeetCode Problems"}
-                   </button>
-                 </div>
+                  <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                    <button
+                      onClick={handleSync}
+                      disabled={isSyncing}
+                      className="px-5 py-3 rounded-xl border border-[var(--accent)] text-[var(--accent)] font-bold text-base bg-transparent hover:bg-[var(--accent-bg)] active:scale-[0.98] transition-all duration-200 min-h-[48px] flex items-center justify-center cursor-pointer flex-1 sm:flex-initial disabled:opacity-60"
+                    >
+                      {isSyncing ? "Syncing..." : "Sync with LeetCode"}
+                    </button>
+                    <button
+                      onClick={handleImport}
+                      disabled={isImporting}
+                      className="px-5 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-base hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[48px] flex items-center justify-center cursor-pointer flex-1 sm:flex-initial disabled:opacity-60"
+                    >
+                      {isImporting ? "Importing..." : "Import My LeetCode Problems"}
+                    </button>
+                  </div>
               </div>
 
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 text-center hover-lift">
                   <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-1">Reputation</span>
                   <h4 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)]">{leetcodeData?.profile?.reputation || 0}</h4>
@@ -260,7 +268,14 @@ function Profile() {
                   <h4 className="text-base sm:text-lg font-bold text-[var(--text-h)] mb-4">Contest Rating History</h4>
                   <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5">
                     <ResponsiveContainer width="100%" height={300}>
-                      <LineChart data={contestHistoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                      <LineChart
+                        data={contestHistoryData}
+                        margin={
+                          isMobile
+                            ? { top: 10, right: 10, left: -25, bottom: 5 }
+                            : { top: 20, right: 30, left: 20, bottom: 5 }
+                        }
+                      >
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                         <XAxis dataKey="date" stroke="var(--text)" fontSize={12} tickLine={false} />
                         <YAxis domain={['auto', 'auto']} stroke="var(--text)" fontSize={12} axisLine={false} tickLine={false} />

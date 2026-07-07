@@ -7,7 +7,16 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
   const [time, setTime] = useState("19:00");
   const [frequency, setFrequency] = useState("Daily");
   const [message, setMessage] = useState("Time to solve today's LeetCode problem!");
+  const [isMobile, setIsMobile] = useState(false);
   const modalRef = useRef(null);
+
+  // Detect mobile viewport responsively
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Load from localStorage on open
   useEffect(() => {
@@ -40,7 +49,7 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
     };
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      // Focus modal container or first input when opened
+      // Focus modal container when opened
       if (modalRef.current) {
         modalRef.current.focus();
       }
@@ -76,6 +85,18 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
     onClose();
   };
 
+  const modalVariants = isMobile
+    ? {
+        hidden: { y: "100%", opacity: 1 },
+        visible: { y: 0, opacity: 1, transition: { type: "spring", damping: 25, stiffness: 250 } },
+        exit: { y: "100%", opacity: 1, transition: { duration: 0.25 } },
+      }
+    : {
+        hidden: { opacity: 0, scale: 0.9, y: 20 },
+        visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
+        exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } },
+      };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -86,27 +107,25 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 pointer-events-auto"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 pointer-events-auto"
           />
 
-          {/* Modal Container */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
-          >
-            <div
+          {/* Modal Container Wrapper */}
+          <div className={`fixed inset-0 z-50 pointer-events-none flex ${isMobile ? "flex-col justify-end p-0" : "items-center justify-center p-4"}`}>
+            <motion.div
               ref={modalRef}
               tabIndex={-1}
-              className="pointer-events-auto w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6 outline-none"
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="pointer-events-auto w-full max-w-md rounded-t-3xl md:rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6 h-[80vh] md:h-auto max-h-[80vh] md:max-h-none flex flex-col overflow-hidden outline-none"
               role="dialog"
               aria-modal="true"
               aria-labelledby="reminder-title"
             >
               {/* Header */}
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between mb-5 flex-shrink-0">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/20">
                     <BellIcon className="w-4 h-4 text-white" />
@@ -117,14 +136,15 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] transition-colors duration-200"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] transition-colors duration-200 min-w-[44px] min-h-[44px]"
                   aria-label="Close settings"
                 >
-                  <XMarkIcon className="w-4 h-4" />
+                  <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+              {/* Scrollable content area */}
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto flex flex-col gap-5 pr-1 pb-4">
                 {/* Time Picker */}
                 <div>
                   <label htmlFor="reminder-time" className="block text-xs font-bold uppercase tracking-wider text-[var(--text)] mb-2">
@@ -136,7 +156,7 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
                     required
-                    className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200"
+                    className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
                   />
                 </div>
 
@@ -149,7 +169,7 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
                     {["Daily", "Weekdays", "Weekly"].map((freq) => (
                       <label
                         key={freq}
-                        className={`flex flex-col items-center justify-center px-3 py-3 rounded-xl border text-sm font-semibold cursor-pointer transition-all duration-200 ${
+                        className={`flex flex-col items-center justify-center px-3 py-3 rounded-xl border text-sm font-semibold cursor-pointer transition-all duration-200 min-h-[48px] ${
                           frequency === freq
                             ? "border-[var(--accent)] bg-[var(--accent-bg)] text-[var(--accent)]"
                             : "border-[var(--border)] bg-[var(--code-bg)] text-[var(--text)] hover:text-[var(--text-h)] hover:border-[var(--accent-border)]"
@@ -179,29 +199,29 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Enter custom reminder message..."
-                    className="w-full min-h-[80px] px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 resize-none"
+                    className="w-full min-h-[96px] px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 resize-none"
                   />
                 </div>
 
                 {/* Buttons */}
-                <div className="flex gap-3 mt-2">
+                <div className="flex gap-3 mt-auto pt-2">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-h)] hover:bg-[var(--code-bg)] transition-all duration-200"
+                    className="flex-1 py-3 rounded-xl border border-[var(--border)] text-base font-semibold text-[var(--text-h)] hover:bg-[var(--code-bg)] transition-all duration-200 min-h-[48px] flex items-center justify-center"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-semibold hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-base font-semibold hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[48px] flex items-center justify-center"
                   >
-                    Save Reminder
+                    Save
                   </button>
                 </div>
               </form>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

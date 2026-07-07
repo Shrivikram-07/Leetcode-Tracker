@@ -30,7 +30,7 @@ function Register() {
 
   return (
     <div className="page-container flex items-center justify-center p-4 min-h-screen">
-      <div className="glass-panel w-full max-w-md p-8 animate-slide-up hover-lift">
+      <div className="glass-panel w-full max-w-md p-6 sm:p-8 animate-slide-up hover-lift">
         <h1 className="text-3xl font-extrabold text-[var(--text-h)] mb-6 mt-0 leading-tight">
           Register
         </h1>
@@ -45,7 +45,7 @@ function Register() {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+            className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
           />
 
           <input
@@ -54,7 +54,7 @@ function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+            className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
           />
 
           <input
@@ -63,12 +63,12 @@ function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+            className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
           />
 
           <button
             type="submit"
-            className="w-full py-3.5 mt-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-bold shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer"
+            className="w-full py-3 mt-2 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-base font-bold shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[48px] flex items-center justify-center cursor-pointer"
           >
             Register
           </button>

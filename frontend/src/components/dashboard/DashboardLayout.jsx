@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 
 export default function DashboardLayout({
   username,
@@ -29,12 +30,19 @@ export default function DashboardLayout({
     navigate("/");
   };
 
+  const syncedText = lastSynced
+    ? `Synced ${new Date(lastSynced).toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })}`
+    : "Not yet synced";
+
   return (
-    <div className="flex min-h-screen bg-[var(--bg)] w-full">
-      {/* Mobile Backdrop blur overlay */}
+    <div className="flex min-h-screen bg-[var(--bg)] w-full overflow-x-hidden">
+      {/* Mobile Backdrop overlay (dark transparent backdrop) */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden transition-all duration-300"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -49,7 +57,7 @@ export default function DashboardLayout({
       />
 
       {/* Main content area */}
-      <div className="flex flex-col flex-1 min-w-0 md:ml-60">
+      <div className="flex flex-col flex-1 min-w-0 md:ml-20 lg:ml-60 transition-all duration-300">
         {/* Top Nav (Responsive hamburger trigger passed) */}
         <TopNav
           username={username}
@@ -61,7 +69,31 @@ export default function DashboardLayout({
         />
 
         {/* Page content */}
-        <main className="flex-1 p-6 overflow-y-auto">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+          {/* Mobile title banner */}
+          <div className="mb-6 md:hidden animate-fade-in">
+            <h1 className="text-xl font-bold text-[var(--text-h)] leading-none mb-1.5">
+              Analytics Dashboard
+            </h1>
+            <p className="text-xs text-[var(--text)] flex items-center gap-1.5">
+              {leetcodeUsername && (
+                <>
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                  <span className="font-semibold text-[var(--text-h)]">
+                    @{leetcodeUsername}
+                  </span>
+                  <span>·</span>
+                </>
+              )}
+              {syncedText}
+              {isRefreshing && (
+                <ArrowPathIcon className="w-3 h-3 text-[var(--accent)] animate-spin ml-1 inline-block" />
+              )}
+            </p>
+          </div>
+
+          {children}
+        </main>
       </div>
     </div>
   );

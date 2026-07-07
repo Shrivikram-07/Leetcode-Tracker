@@ -262,7 +262,7 @@ export default function Dashboard() {
       {/* ── Loading ───────────────────────────────────────────────────────── */}
       {lcLoading && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 8 }).map((_, i) => (
               <SkeletonCard key={i} />
             ))}
@@ -387,7 +387,7 @@ export default function Dashboard() {
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-[var(--text)] mb-3 opacity-70">
                   LeetCode Stats
                 </h2>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   {statCards.map((card, i) => (
                     <StatsCard key={card.label} {...card} delay={i * 0.04} />
                   ))}
@@ -423,7 +423,7 @@ export default function Dashboard() {
                   <h3 className="text-sm font-semibold text-[var(--text-h)] mb-4">
                     Local Tracker Summary
                   </h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
                     {[
                       { label: "Tracked", value: totalProblems, color: "text-[var(--accent)]" },
                       { label: "Solved", value: solvedLocal, color: "text-emerald-500" },

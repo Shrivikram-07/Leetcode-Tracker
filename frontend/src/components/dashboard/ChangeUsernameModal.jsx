@@ -8,7 +8,16 @@ import { useQueryClient } from "@tanstack/react-query";
 export default function ChangeUsernameModal({ isOpen, onClose }) {
   const [username, setUsername] = useState("");
   const [isSaving, setIsSaving] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const queryClient = useQueryClient();
+
+  // Detect mobile viewport responsively
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Accessibility: Close on Escape key
   useEffect(() => {
@@ -46,6 +55,18 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
     }
   };
 
+  const modalVariants = isMobile
+    ? {
+        hidden: { y: "100%", opacity: 1 },
+        visible: { y: 0, opacity: 1, transition: { type: "spring", damping: 25, stiffness: 250 } },
+        exit: { y: "100%", opacity: 1, transition: { duration: 0.25 } },
+      }
+    : {
+        hidden: { opacity: 0, scale: 0.9, y: 20 },
+        visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } },
+        exit: { opacity: 0, scale: 0.9, y: 20, transition: { duration: 0.2 } },
+      };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -56,22 +77,22 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs z-50 pointer-events-auto"
           />
 
-          {/* Modal */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
-          >
-            <div className="pointer-events-auto w-full max-w-sm rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6">
+          {/* Modal Container Wrapper */}
+          <div className={`fixed inset-0 z-50 pointer-events-none flex ${isMobile ? "flex-col justify-end p-0" : "items-center justify-center p-4"}`}>
+            <motion.div
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="pointer-events-auto w-full max-w-sm rounded-t-3xl md:rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6 h-[80vh] md:h-auto max-h-[80vh] md:max-h-none flex flex-col overflow-hidden"
+            >
               {/* Header */}
-              <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center justify-between mb-5 flex-shrink-0">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-md">
                     <PencilSquareIcon className="w-4 h-4 text-white" />
                   </div>
                   <h2 className="text-base font-bold text-[var(--text-h)]">
@@ -80,18 +101,21 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
                 </div>
                 <button
                   onClick={onClose}
-                  className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] transition-colors"
+                  className="w-10 h-10 rounded-lg flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] transition-colors min-w-[44px] min-h-[44px]"
+                  title="Close modal"
                 >
-                  <XMarkIcon className="w-4 h-4" />
+                  <XMarkIcon className="w-5 h-5" />
                 </button>
               </div>
 
-              <p className="text-sm text-[var(--text)] mb-4 leading-relaxed">
-                Enter your new LeetCode username. It will be verified before
-                saving.
-              </p>
+              <div className="flex-shrink-0">
+                <p className="text-sm text-[var(--text)] mb-4 leading-relaxed">
+                  Enter your new LeetCode username. It will be verified before
+                  saving.
+                </p>
+              </div>
 
-              <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+              <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto flex flex-col gap-4 pr-1 pb-4">
                 <input
                   type="text"
                   placeholder="New LeetCode username"
@@ -99,13 +123,13 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
                   onChange={(e) => setUsername(e.target.value)}
                   disabled={isSaving}
                   autoFocus
-                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 disabled:opacity-60"
+                  className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 disabled:opacity-60 min-h-[48px]"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-3 mt-auto">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-h)] hover:bg-[var(--code-bg)] transition-all duration-200"
+                    className="flex-1 py-3 rounded-xl border border-[var(--border)] text-base font-semibold text-[var(--text-h)] hover:bg-[var(--code-bg)] transition-all duration-200 min-h-[48px] flex items-center justify-center"
                   >
                     Cancel
                   </button>
@@ -113,14 +137,14 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
                     whileTap={{ scale: 0.97 }}
                     type="submit"
                     disabled={isSaving}
-                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-sm font-semibold hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 text-white text-base font-semibold hover:shadow-lg hover:shadow-blue-500/20 disabled:opacity-60 disabled:cursor-not-allowed transition-all duration-200 min-h-[48px] flex items-center justify-center"
                   >
                     {isSaving ? "Saving…" : "Save"}
                   </motion.button>
                 </div>
               </form>
-            </div>
-          </motion.div>
+            </motion.div>
+          </div>
         </>
       )}
     </AnimatePresence>

@@ -82,7 +82,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8 text-left bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-md">
+    <div className="w-full max-w-2xl mx-auto mb-8 text-left bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-md">
       <h3 className="text-lg font-bold text-[var(--text-h)] mb-4">
         {editingProblem ? "Edit Tracked Problem" : "Track New Problem"}
       </h3>
@@ -96,7 +96,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
             onChange={(e) => setTitle(e.target.value)}
             required
             disabled={isSubmitting}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+            className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
           />
           <input
             type="text"
@@ -105,7 +105,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
             onChange={(e) => setTopic(e.target.value)}
             required
             disabled={isSubmitting}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+            className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
           />
         </div>
 
@@ -114,7 +114,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px] cursor-pointer"
+            className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px] cursor-pointer"
           >
             <option value="Easy">Easy</option>
             <option value="Medium">Medium</option>
@@ -125,7 +125,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             disabled={isSubmitting}
-            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px] cursor-pointer"
+            className="flex-1 px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px] cursor-pointer"
           >
             <option value="To Do">To Do</option>
             <option value="Attempting">Attempting</option>
@@ -139,7 +139,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
           value={leetcodeLink}
           onChange={(e) => setLeetcodeLink(e.target.value)}
           disabled={isSubmitting}
-          className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
+          className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[48px]"
         />
 
         <textarea
@@ -147,14 +147,14 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           disabled={isSubmitting}
-          className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[100px] resize-none"
+          className="w-full px-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-base placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[100px] resize-none"
         />
 
         <div className="flex flex-col sm:flex-row gap-3 mt-2">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="flex-1 py-3 px-5 rounded-xl bg-[var(--accent)] text-white text-sm font-bold shadow-md hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+            className="flex-1 py-3 px-5 rounded-xl bg-[var(--accent)] text-white text-base font-bold shadow-md hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[48px] flex items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Saving..." : (editingProblem ? "Update Problem" : "Add Problem")}
           </button>
@@ -163,7 +163,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
               type="button"
               onClick={() => setEditingProblem(null)}
               disabled={isSubmitting}
-              className="flex-1 py-3 px-5 rounded-xl border border-[var(--border)] text-[var(--text-h)] text-sm font-bold hover:bg-[var(--bg)] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer"
+              className="flex-1 py-3 px-5 rounded-xl border border-[var(--border)] text-[var(--text-h)] text-base font-bold hover:bg-[var(--bg)] transition-all duration-200 min-h-[48px] flex items-center justify-center cursor-pointer"
             >
               Cancel
             </button>
