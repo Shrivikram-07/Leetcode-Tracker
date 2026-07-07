@@ -27,8 +27,8 @@ export default function TopNav({
       transition={{ duration: 0.4 }}
       className="sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md min-h-[73px]"
     >
-      {/* Mobile view (<768px): Hamburger & Logo */}
-      <div className="flex items-center gap-3 md:hidden">
+      {/* Mobile view (<1024px): Hamburger & Logo */}
+      <div className="flex items-center gap-3 lg:hidden">
         <button
           onClick={onMenuToggle}
           className="p-3 -ml-3 rounded-lg hover:bg-[var(--code-bg)] text-[var(--text)] hover:text-[var(--text-h)] transition-colors duration-200 min-w-[48px] min-h-[48px] flex items-center justify-center"
@@ -50,8 +50,8 @@ export default function TopNav({
         </div>
       </div>
 
-      {/* Desktop/Tablet view (>=768px): Page Title & Subtitle */}
-      <div className="hidden md:block">
+      {/* Desktop/Tablet view (>=1024px): Page Title & Subtitle */}
+      <div className="hidden lg:block">
         <h1 className="text-base sm:text-lg font-bold text-[var(--text-h)] leading-none mb-0.5">
           Analytics Dashboard
         </h1>
