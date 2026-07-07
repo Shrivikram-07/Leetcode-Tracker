@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import DashboardLayout from "../components/dashboard/DashboardLayout";
+import ReminderModal from "../components/dashboard/ReminderModal";
 
 function Profile() {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ function Profile() {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [reminderModalOpen, setReminderModalOpen] = useState(false);
   
   const [loading, setLoading] = useState(true);
   const [theme, setTheme] = useState(
@@ -145,98 +147,118 @@ function Profile() {
       leetcodeUsername={profileData?.leetcode_username || ""}
       lastSynced={leetcodeData ? new Date().toISOString() : null}
       isRefreshing={isSyncing}
+      onOpenReminder={() => setReminderModalOpen(true)}
     >
+      <ReminderModal isOpen={reminderModalOpen} onClose={() => setReminderModalOpen(false)} />
       {loading ? (
         <p className="text-sm text-[var(--text)]">Loading Profile...</p>
       ) : (
-        <div style={styles.grid}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto">
           {/* Native Profile Card */}
-          <div className="glass-panel animate-slide-up hover-lift" style={styles.profileCard}>
-            <h3 style={styles.title} className="gradient-text">Tracker Profile</h3>
-            <div style={styles.infoGrid}>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Username</span>
-                <span style={styles.infoValue}>{profileData?.username || "N/A"}</span>
+          <div className="glass-panel p-6 sm:p-8 text-left animate-slide-up hover-lift">
+            <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)] pb-3 mb-5 border-b border-[var(--glass-border)] gradient-text">
+              Tracker Profile
+            </h3>
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center py-2.5 border-b border-dashed border-[var(--border)]">
+                <span className="text-sm font-semibold text-[var(--text)]">Username</span>
+                <span className="text-sm sm:text-base font-bold text-[var(--text-h)]">{profileData?.username || "N/A"}</span>
               </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Email</span>
-                <span style={styles.infoValue}>{profileData?.email || "N/A"}</span>
+              <div className="flex justify-between items-center py-2.5 border-b border-dashed border-[var(--border)]">
+                <span className="text-sm font-semibold text-[var(--text)]">Email</span>
+                <span className="text-sm sm:text-base font-bold text-[var(--text-h)] truncate max-w-[180px] sm:max-w-none">{profileData?.email || "N/A"}</span>
               </div>
-              <div style={styles.infoItem}>
-                <span style={styles.infoLabel}>Member Since</span>
-                <span style={styles.infoValue}>{formatDate(profileData?.created_at)}</span>
+              <div className="flex justify-between items-center py-2.5 border-b border-dashed border-[var(--border)]">
+                <span className="text-sm font-semibold text-[var(--text)]">Member Since</span>
+                <span className="text-sm sm:text-base font-bold text-[var(--text-h)]">{formatDate(profileData?.created_at)}</span>
               </div>
             </div>
           </div>
 
           {/* LeetCode Section */}
           {!profileData?.leetcode_username ? (
-            <div className="glass-panel animate-slide-up hover-lift" style={{ ...styles.profileCard, animationDelay: "0.1s" }}>
-              <h3 style={styles.title}>Connect LeetCode</h3>
-              <p style={styles.desc}>Link your public LeetCode username to sync stats and problems.</p>
-              <form onSubmit={handleConnect} style={styles.connectForm}>
+            <div className="glass-panel p-6 sm:p-8 text-left animate-slide-up hover-lift" style={{ animationDelay: "0.1s" }}>
+              <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)] pb-3 mb-5 border-b border-[var(--glass-border)]">
+                Connect LeetCode
+              </h3>
+              <p className="text-sm text-[var(--text)] mb-4 leading-relaxed">
+                Link your public LeetCode username to sync stats and problems.
+              </p>
+              <form onSubmit={handleConnect} className="flex flex-col gap-3 mt-4">
                 <input
                   type="text"
                   placeholder="Enter LeetCode Username"
                   value={connectUsername}
                   onChange={(e) => setConnectUsername(e.target.value)}
-                  style={styles.input}
                   required
+                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
                 />
-                <button type="submit" disabled={isConnecting} style={styles.primaryBtn}>
+                <button
+                  type="submit"
+                  disabled={isConnecting}
+                  className="w-full px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                >
                   {isConnecting ? "Connecting..." : "Connect"}
                 </button>
               </form>
             </div>
           ) : (
-            <div className="glass-panel animate-slide-up" style={{ ...styles.profileCard, gridColumn: "1 / -1", animationDelay: "0.1s" }}>
-              <div style={styles.lcHeader}>
-                 <div style={styles.lcHeaderLeft}>
+            <div className="glass-panel p-6 sm:p-8 text-left animate-slide-up md:col-span-2" style={{ animationDelay: "0.1s" }}>
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 mb-8 border-b border-[var(--glass-border)]">
+                 <div className="flex items-center gap-4">
                     {leetcodeData?.profile?.avatar && (
-                       <img src={leetcodeData.profile.avatar} alt="avatar" style={styles.avatar} />
+                       <img src={leetcodeData.profile.avatar} alt="avatar" className="w-14 h-14 rounded-full border-2 border-[var(--accent)] object-cover shadow-md" />
                     )}
                     <div>
-                       <h3 style={{ ...styles.title, borderBottom: 'none', margin: 0 }} className="gradient-text">
+                       <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)] gradient-text leading-tight mb-0.5">
                          {profileData.leetcode_username}
                        </h3>
-                       <span style={styles.lcRank}>
+                       <span className="text-sm font-medium text-[var(--text)]">
                          Rank: {leetcodeData?.profile?.ranking || "N/A"}
                        </span>
                     </div>
                  </div>
-                 <div style={styles.lcActions}>
-                   <button onClick={handleSync} disabled={isSyncing} style={styles.secondaryBtn}>
+                 <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+                   <button
+                     onClick={handleSync}
+                     disabled={isSyncing}
+                     className="px-5 py-2.5 rounded-xl border border-[var(--accent)] text-[var(--accent)] font-bold text-sm bg-transparent hover:bg-[var(--accent-bg)] active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer flex-1 sm:flex-initial disabled:opacity-60"
+                   >
                      {isSyncing ? "Syncing..." : "Sync with LeetCode"}
                    </button>
-                   <button onClick={handleImport} disabled={isImporting} style={styles.primaryBtn}>
+                   <button
+                     onClick={handleImport}
+                     disabled={isImporting}
+                     className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-sm hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer flex-1 sm:flex-initial disabled:opacity-60"
+                   >
                      {isImporting ? "Importing..." : "Import My LeetCode Problems"}
                    </button>
                  </div>
               </div>
 
-              <div style={styles.lcStatsGrid}>
-                <div style={styles.lcStatBox}>
-                  <span style={styles.lcStatLabel}>Reputation</span>
-                  <h4 style={styles.lcStatValue}>{leetcodeData?.profile?.reputation || 0}</h4>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 text-center hover-lift">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-1">Reputation</span>
+                  <h4 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)]">{leetcodeData?.profile?.reputation || 0}</h4>
                 </div>
-                <div style={styles.lcStatBox}>
-                  <span style={styles.lcStatLabel}>Country</span>
-                  <h4 style={styles.lcStatValue}>{leetcodeData?.profile?.country || "N/A"}</h4>
+                <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 text-center hover-lift">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-1">Country</span>
+                  <h4 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)] truncate">{leetcodeData?.profile?.country || "N/A"}</h4>
                 </div>
-                <div style={styles.lcStatBox}>
-                  <span style={styles.lcStatLabel}>School</span>
-                  <h4 style={{ ...styles.lcStatValue, fontSize: "16px" }}>{leetcodeData?.profile?.school || "N/A"}</h4>
+                <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 text-center hover-lift">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-1">School</span>
+                  <h4 className="text-sm sm:text-base font-bold text-[var(--text-h)] truncate mt-1">{leetcodeData?.profile?.school || "N/A"}</h4>
                 </div>
-                <div style={styles.lcStatBox}>
-                  <span style={styles.lcStatLabel}>Contest Rating</span>
-                  <h4 style={styles.lcStatValue}>{leetcodeData?.contest?.contestRating ? Math.round(leetcodeData.contest.contestRating) : "N/A"}</h4>
+                <div className="rounded-2xl border border-[var(--glass-border)] bg-[var(--glass-bg)] p-4 text-center hover-lift">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-1">Contest Rating</span>
+                  <h4 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)]">{leetcodeData?.contest?.contestRating ? Math.round(leetcodeData.contest.contestRating) : "N/A"}</h4>
                 </div>
               </div>
 
               {contestHistoryData.length > 0 && (
-                <div style={{ marginTop: "32px" }}>
-                  <h4 style={styles.chartTitle}>Contest Rating History</h4>
-                  <div style={styles.chartContainer}>
+                <div className="mt-8">
+                  <h4 className="text-base sm:text-lg font-bold text-[var(--text-h)] mb-4">Contest Rating History</h4>
+                  <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5">
                     <ResponsiveContainer width="100%" height={300}>
                       <LineChart data={contestHistoryData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
@@ -259,244 +281,5 @@ function Profile() {
     </DashboardLayout>
   );
 }
-
-const styles = {
-  container: {
-    padding: "0 24px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "24px",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "16px 0",
-    borderBottom: "1px solid var(--border)",
-  },
-  logoSec: {
-    textAlign: "left",
-    cursor: "pointer",
-  },
-  logo: {
-    margin: 0,
-    fontSize: "22px",
-    color: "var(--accent)",
-    fontWeight: "700",
-  },
-  userSec: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-  navLink: {
-    fontSize: "14px",
-    color: "var(--text)",
-    cursor: "pointer",
-    fontWeight: "500",
-    transition: "color 0.2s",
-  },
-  navLinkActive: {
-    color: "var(--accent)",
-    fontWeight: "600",
-  },
-  logoutBtn: {
-    background: "none",
-    border: "1px solid var(--border)",
-    color: "var(--text-h)",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    fontSize: "14px",
-    cursor: "pointer",
-    transition: "background 0.2s, border-color 0.2s",
-    fontFamily: "var(--sans)",
-    fontWeight: "500",
-    "&:hover": {
-      borderColor: "var(--accent)",
-    }
-  },
-  themeToggleBtn: {
-    background: "none",
-    border: "1px solid var(--border)",
-    color: "var(--text-h)",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    fontSize: "14px",
-    cursor: "pointer",
-    transition: "background 0.2s, border-color 0.2s",
-    fontFamily: "var(--sans)",
-    fontWeight: "500",
-    "&:hover": {
-      borderColor: "var(--accent)",
-    }
-  },
-  main: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "32px",
-    paddingBottom: "48px",
-    alignItems: "center",
-  },
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-    gap: "24px",
-    width: "100%",
-    maxWidth: "900px",
-  },
-  profileCard: {
-    padding: "32px",
-    textAlign: "left",
-  },
-  title: {
-    margin: "0 0 20px 0",
-    color: "var(--text-h)",
-    fontWeight: "700",
-    fontSize: "24px",
-    borderBottom: "1px solid var(--glass-border)",
-    paddingBottom: "12px",
-  },
-  desc: {
-    color: "var(--text)",
-    fontSize: "14px",
-    marginBottom: "16px",
-  },
-  infoGrid: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "16px",
-  },
-  infoItem: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: "10px 0",
-    borderBottom: "1px dotted var(--border)",
-  },
-  infoLabel: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "var(--text)",
-  },
-  infoValue: {
-    fontSize: "15px",
-    fontWeight: "600",
-    color: "var(--text-h)",
-  },
-  connectForm: {
-    display: "flex",
-    gap: "12px",
-    marginTop: "16px",
-  },
-  input: {
-    flex: 1,
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid var(--border)",
-    background: "var(--bg)",
-    color: "var(--text-h)",
-    fontFamily: "var(--sans)",
-    fontSize: "14px",
-    outline: "none",
-    transition: "border-color 0.2s",
-    "&:focus": {
-      borderColor: "var(--accent)",
-    }
-  },
-  primaryBtn: {
-    background: "var(--gradient-primary)",
-    border: "none",
-    color: "#fff",
-    padding: "10px 16px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    cursor: "pointer",
-    fontFamily: "var(--sans)",
-    fontWeight: "600",
-    transition: "opacity 0.2s",
-  },
-  secondaryBtn: {
-    background: "transparent",
-    border: "1px solid var(--accent)",
-    color: "var(--accent)",
-    padding: "10px 16px",
-    borderRadius: "8px",
-    fontSize: "14px",
-    cursor: "pointer",
-    fontFamily: "var(--sans)",
-    fontWeight: "600",
-    transition: "background 0.2s, color 0.2s",
-  },
-  lcHeader: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    flexWrap: "wrap",
-    gap: "16px",
-    marginBottom: "32px",
-    borderBottom: "1px solid var(--glass-border)",
-    paddingBottom: "16px",
-  },
-  lcHeaderLeft: {
-    display: "flex",
-    alignItems: "center",
-    gap: "16px",
-  },
-  avatar: {
-    width: "64px",
-    height: "64px",
-    borderRadius: "50%",
-    border: "2px solid var(--accent)",
-    objectFit: "cover",
-  },
-  lcRank: {
-    fontSize: "14px",
-    color: "var(--text)",
-    fontWeight: "500",
-  },
-  lcActions: {
-    display: "flex",
-    gap: "12px",
-    flexWrap: "wrap",
-  },
-  lcStatsGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-    gap: "16px",
-  },
-  lcStatBox: {
-    background: "var(--glass-bg)",
-    border: "1px solid var(--glass-border)",
-    borderRadius: "12px",
-    padding: "16px",
-    textAlign: "center",
-  },
-  lcStatLabel: {
-    display: "block",
-    fontSize: "12px",
-    fontWeight: "600",
-    textTransform: "uppercase",
-    color: "var(--text)",
-    marginBottom: "8px",
-  },
-  lcStatValue: {
-    margin: 0,
-    fontSize: "24px",
-    fontWeight: "700",
-    color: "var(--text-h)",
-  },
-  chartTitle: {
-    margin: "0 0 16px 0",
-    color: "var(--text-h)",
-    fontSize: "18px",
-    fontWeight: "600",
-  },
-  chartContainer: {
-    background: "var(--code-bg)",
-    borderRadius: "12px",
-    padding: "20px 0",
-    border: "1px solid var(--border)",
-  }
-};
 
 export default Profile;

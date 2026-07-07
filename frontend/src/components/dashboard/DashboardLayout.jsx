@@ -8,6 +8,7 @@ export default function DashboardLayout({
   leetcodeUsername,
   lastSynced,
   isRefreshing,
+  onOpenReminder,
   children,
 }) {
   const navigate = useNavigate();
@@ -29,7 +30,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex min-h-screen bg-[var(--bg)]" style={{ width: "100vw", marginLeft: "calc(-50vw + 50%)" }}>
+    <div className="flex min-h-screen bg-[var(--bg)] w-full">
       {/* Mobile Backdrop blur overlay */}
       {isMobileMenuOpen && (
         <div
@@ -56,6 +57,7 @@ export default function DashboardLayout({
           lastSynced={lastSynced}
           isRefreshing={isRefreshing}
           onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          onOpenReminder={onOpenReminder}
         />
 
         {/* Page content */}

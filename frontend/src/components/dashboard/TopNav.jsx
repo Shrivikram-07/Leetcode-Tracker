@@ -7,6 +7,7 @@ export default function TopNav({
   lastSynced,
   isRefreshing,
   onMenuToggle,
+  onOpenReminder,
 }) {
   const initials = username
     ? username.slice(0, 2).toUpperCase()
@@ -61,7 +62,12 @@ export default function TopNav({
 
       {/* Right — Avatar */}
       <div className="flex items-center gap-3">
-        <button className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] transition-colors duration-200">
+        <button
+          onClick={onOpenReminder}
+          className="w-8 h-8 rounded-xl flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--accent)] transition-colors duration-200"
+          title="Reminder Settings"
+          aria-label="Open Reminder Settings"
+        >
           <BellIcon className="w-4 h-4" />
         </button>
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/30 flex-shrink-0">

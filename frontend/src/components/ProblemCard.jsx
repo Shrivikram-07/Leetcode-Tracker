@@ -1,64 +1,40 @@
 import React from "react";
 
 function ProblemCard({ problem, onDelete, onEdit }) {
-  const getDifficultyStyle = (diff) => {
+  const getDifficultyClass = (diff) => {
     switch (diff) {
       case "Easy":
-        return {
-          color: "#10b981",
-          background: "rgba(16, 185, 129, 0.1)",
-          border: "1px solid rgba(16, 185, 129, 0.2)",
-        };
+        return "text-emerald-500 bg-emerald-500/10 border border-emerald-500/20";
       case "Medium":
-        return {
-          color: "#f59e0b",
-          background: "rgba(245, 158, 11, 0.1)",
-          border: "1px solid rgba(245, 158, 11, 0.2)",
-        };
+        return "text-amber-500 bg-amber-500/10 border border-amber-500/20";
       case "Hard":
-        return {
-          color: "#ef4444",
-          background: "rgba(239, 68, 68, 0.1)",
-          border: "1px solid rgba(239, 68, 68, 0.2)",
-        };
+        return "text-red-500 bg-red-500/10 border border-red-500/20";
       default:
-        return {};
+        return "text-gray-500 bg-gray-500/10 border border-gray-500/20";
     }
   };
 
-  const getStatusStyle = (status) => {
+  const getStatusClass = (status) => {
     switch (status) {
       case "Solved":
-        return {
-          color: "#3b82f6",
-          background: "rgba(59, 130, 246, 0.1)",
-          border: "1px solid rgba(59, 130, 246, 0.2)",
-        };
+        return "text-blue-500 bg-blue-500/10 border border-blue-500/20";
       case "Attempting":
-        return {
-          color: "#8b5cf6",
-          background: "rgba(139, 92, 246, 0.1)",
-          border: "1px solid rgba(139, 92, 246, 0.2)",
-        };
+        return "text-purple-500 bg-purple-500/10 border border-purple-500/20";
       default: // "To Do"
-        return {
-          color: "#6b7280",
-          background: "rgba(107, 114, 128, 0.1)",
-          border: "1px solid rgba(107, 114, 128, 0.2)",
-        };
+        return "text-gray-500 bg-gray-500/10 border border-gray-500/20";
     }
   };
 
   return (
-    <div style={styles.card}>
-      <div style={styles.header}>
-        <h4 style={styles.title}>
+    <div className="bg-[var(--bg)] border border-[var(--border)] rounded-2xl p-5 text-left shadow-md flex flex-col gap-4 hover-lift duration-200">
+      <div className="flex justify-between items-start gap-3">
+        <h4 className="text-base sm:text-lg font-bold text-[var(--text-h)] leading-tight break-words flex-1">
           {problem.leetcode_link ? (
             <a
               href={problem.leetcode_link}
               target="_blank"
               rel="noopener noreferrer"
-              style={styles.link}
+              className="text-[var(--accent)] hover:underline transition-all duration-200"
             >
               {problem.title} ↗
             </a>
@@ -66,17 +42,17 @@ function ProblemCard({ problem, onDelete, onEdit }) {
             problem.title
           )}
         </h4>
-        <div style={styles.actionButtons}>
+        <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={() => onEdit(problem)}
-            style={styles.editButton}
+            className="bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Edit Problem"
           >
             Edit
           </button>
           <button
             onClick={() => onDelete(problem.id)}
-            style={styles.deleteButton}
+            className="bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
             title="Delete Problem"
           >
             Delete
@@ -84,120 +60,24 @@ function ProblemCard({ problem, onDelete, onEdit }) {
         </div>
       </div>
 
-      <div style={styles.metaRow}>
-        <span style={{ ...styles.badge, ...getDifficultyStyle(problem.difficulty) }}>
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider ${getDifficultyClass(problem.difficulty)}`}>
           {problem.difficulty}
         </span>
-        <span style={{ ...styles.badge, ...getStatusStyle(problem.status) }}>
+        <span className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider ${getStatusClass(problem.status)}`}>
           {problem.status}
         </span>
-        <span style={styles.topic}>#{problem.topic}</span>
+        <span className="text-xs text-[var(--text)] font-semibold font-mono">#{problem.topic}</span>
       </div>
 
       {problem.notes && (
-        <div style={styles.notesContainer}>
-          <strong style={styles.notesHeader}>Notes:</strong>
-          <p style={styles.notesText}>{problem.notes}</p>
+        <div className="bg-[var(--code-bg)] p-3 rounded-xl border-l-4 border-[var(--border)]">
+          <strong className="block text-[10px] font-bold text-[var(--text-h)] uppercase tracking-wider mb-1">Notes:</strong>
+          <p className="text-xs text-[var(--text)] leading-relaxed whitespace-pre-wrap break-words">{problem.notes}</p>
         </div>
       )}
     </div>
   );
 }
-
-const styles = {
-  card: {
-    background: "var(--bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    padding: "20px",
-    textAlign: "left",
-    boxShadow: "var(--shadow)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    transition: "transform 0.2s, border-color 0.2s",
-  },
-  header: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    gap: "12px",
-  },
-  title: {
-    margin: 0,
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "var(--text-h)",
-  },
-  link: {
-    color: "var(--accent)",
-    textDecoration: "none",
-    transition: "opacity 0.2s",
-  },
-  actionButtons: {
-    display: "flex",
-    gap: "8px",
-  },
-  editButton: {
-    background: "rgba(59, 130, 246, 0.1)",
-    border: "1px solid rgba(59, 130, 246, 0.3)",
-    color: "#3b82f6",
-    padding: "4px 8px",
-    borderRadius: "6px",
-    fontSize: "12px",
-    fontWeight: "500",
-    cursor: "pointer",
-    transition: "background 0.2s, color 0.2s",
-  },
-  deleteButton: {
-    background: "rgba(239, 68, 68, 0.1)",
-    border: "1px solid rgba(239, 68, 68, 0.3)",
-    color: "#ef4444",
-    padding: "4px 8px",
-    borderRadius: "6px",
-    fontSize: "12px",
-    fontWeight: "500",
-    cursor: "pointer",
-    transition: "background 0.2s, color 0.2s",
-  },
-  metaRow: {
-    display: "flex",
-    gap: "8px",
-    alignItems: "center",
-    flexWrap: "wrap",
-  },
-  badge: {
-    fontSize: "12px",
-    fontWeight: "600",
-    padding: "2px 8px",
-    borderRadius: "20px",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-  },
-  topic: {
-    fontSize: "13px",
-    color: "var(--text)",
-    fontFamily: "var(--mono)",
-  },
-  notesContainer: {
-    background: "var(--code-bg)",
-    padding: "10px 12px",
-    borderRadius: "8px",
-    borderLeft: "3px solid var(--border)",
-  },
-  notesHeader: {
-    display: "block",
-    fontSize: "12px",
-    color: "var(--text-h)",
-    marginBottom: "4px",
-  },
-  notesText: {
-    margin: 0,
-    fontSize: "13px",
-    lineHeight: "1.4",
-    color: "var(--text)",
-    whiteSpace: "pre-wrap",
-  },
-};
 
 export default ProblemCard;

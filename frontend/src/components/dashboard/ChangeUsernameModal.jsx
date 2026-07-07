@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { XMarkIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
@@ -9,6 +9,21 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
   const [username, setUsername] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const queryClient = useQueryClient();
+
+  // Accessibility: Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

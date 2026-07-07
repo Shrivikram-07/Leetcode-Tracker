@@ -1,0 +1,209 @@
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { XMarkIcon, BellIcon } from "@heroicons/react/24/outline";
+import toast from "react-hot-toast";
+
+export default function ReminderModal({ isOpen, onClose, onSave }) {
+  const [time, setTime] = useState("19:00");
+  const [frequency, setFrequency] = useState("Daily");
+  const [message, setMessage] = useState("Time to solve today's LeetCode problem!");
+  const modalRef = useRef(null);
+
+  // Load from localStorage on open
+  useEffect(() => {
+    if (isOpen) {
+      const stored = localStorage.getItem("leetcode_tracker_reminder");
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          setTime(parsed.time || "19:00");
+          setFrequency(parsed.frequency || "Daily");
+          setMessage(parsed.message || "Time to solve today's LeetCode problem!");
+        } catch (e) {
+          console.error("Error parsing reminder settings:", e);
+        }
+      } else {
+        // Reset to defaults
+        setTime("19:00");
+        setFrequency("Daily");
+        setMessage("Time to solve today's LeetCode problem!");
+      }
+    }
+  }, [isOpen]);
+
+  // Accessibility: Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    if (isOpen) {
+      window.addEventListener("keydown", handleKeyDown);
+      // Focus modal container or first input when opened
+      if (modalRef.current) {
+        modalRef.current.focus();
+      }
+    }
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const existing = localStorage.getItem("leetcode_tracker_reminder");
+    
+    const settings = {
+      enabled: true,
+      time,
+      frequency,
+      message: message.trim() || "Time to solve today's LeetCode problem!"
+    };
+
+    localStorage.setItem("leetcode_tracker_reminder", JSON.stringify(settings));
+
+    if (existing) {
+      toast.success("Reminder updated successfully!");
+    } else {
+      toast.success("Reminder saved successfully!");
+    }
+
+    if (onSave) {
+      onSave(settings);
+    }
+    onClose();
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 pointer-events-auto"
+          />
+
+          {/* Modal Container */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="fixed inset-0 flex items-center justify-center z-50 p-4 pointer-events-none"
+          >
+            <div
+              ref={modalRef}
+              tabIndex={-1}
+              className="pointer-events-auto w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6 outline-none"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="reminder-title"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-5">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md shadow-violet-500/20">
+                    <BellIcon className="w-4 h-4 text-white" />
+                  </div>
+                  <h2 id="reminder-title" className="text-base font-bold text-[var(--text-h)]">
+                    🔔 Reminder Settings
+                  </h2>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] transition-colors duration-200"
+                  aria-label="Close settings"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+                {/* Time Picker */}
+                <div>
+                  <label htmlFor="reminder-time" className="block text-xs font-bold uppercase tracking-wider text-[var(--text)] mb-2">
+                    Reminder Time
+                  </label>
+                  <input
+                    id="reminder-time"
+                    type="time"
+                    value={time}
+                    onChange={(e) => setTime(e.target.value)}
+                    required
+                    className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200"
+                  />
+                </div>
+
+                {/* Frequency Selectors */}
+                <div>
+                  <span className="block text-xs font-bold uppercase tracking-wider text-[var(--text)] mb-3">
+                    Frequency
+                  </span>
+                  <div className="grid grid-cols-3 gap-2">
+                    {["Daily", "Weekdays", "Weekly"].map((freq) => (
+                      <label
+                        key={freq}
+                        className={`flex flex-col items-center justify-center px-3 py-3 rounded-xl border text-sm font-semibold cursor-pointer transition-all duration-200 ${
+                          frequency === freq
+                            ? "border-[var(--accent)] bg-[var(--accent-bg)] text-[var(--accent)]"
+                            : "border-[var(--border)] bg-[var(--code-bg)] text-[var(--text)] hover:text-[var(--text-h)] hover:border-[var(--accent-border)]"
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="frequency"
+                          value={freq}
+                          checked={frequency === freq}
+                          onChange={() => setFrequency(freq)}
+                          className="sr-only"
+                        />
+                        {freq}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Message TextArea */}
+                <div>
+                  <label htmlFor="reminder-message" className="block text-xs font-bold uppercase tracking-wider text-[var(--text)] mb-2">
+                    Reminder Message
+                  </label>
+                  <textarea
+                    id="reminder-message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder="Enter custom reminder message..."
+                    className="w-full min-h-[80px] px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--code-bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 resize-none"
+                  />
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 mt-2">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="flex-1 py-2.5 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-h)] hover:bg-[var(--code-bg)] transition-all duration-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white text-sm font-semibold hover:shadow-lg hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200"
+                  >
+                    Save Reminder
+                  </button>
+                </div>
+              </form>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}

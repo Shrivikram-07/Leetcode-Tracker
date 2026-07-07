@@ -19,6 +19,7 @@ import ContestCard from "../components/dashboard/ContestCard";
 import QuickActionsCard from "../components/dashboard/QuickActionsCard";
 import ConnectCard from "../components/dashboard/ConnectCard";
 import ChangeUsernameModal from "../components/dashboard/ChangeUsernameModal";
+import ReminderModal from "../components/dashboard/ReminderModal";
 import { SkeletonCard, SkeletonChart } from "../components/dashboard/LoadingSkeleton";
 import AddProblem from "../components/AddProblem";
 import ProblemList from "../components/ProblemList";
@@ -36,6 +37,18 @@ import {
   CpuChipIcon,
 } from "@heroicons/react/24/outline";
 import api from "../api";
+
+// ─── Helper to format time to 12h ─────────────────────────────────────────────
+function formatTime12h(timeStr) {
+  if (!timeStr) return "";
+  const [hoursStr, minutesStr] = timeStr.split(":");
+  let hours = parseInt(hoursStr, 10);
+  const minutes = minutesStr;
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12;
+  hours = hours ? hours : 12; // the hour '0' should be '12'
+  return `${hours}:${minutes} ${ampm}`;
+}
 
 // ─── Helper to build stat card definitions ────────────────────────────────────
 function buildStatCards(solved, profile, contest) {
@@ -97,6 +110,8 @@ export default function Dashboard() {
   const queryClient = useQueryClient();
 
   const [changeModalOpen, setChangeModalOpen] = useState(false);
+  const [reminderModalOpen, setReminderModalOpen] = useState(false);
+  const [reminder, setReminder] = useState(null);
   const [editingProblem, setEditingProblem] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDifficulty, setFilterDifficulty] = useState("");
@@ -105,6 +120,18 @@ export default function Dashboard() {
   const [lastSynced, setLastSynced] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Load reminder settings from localStorage
+  useEffect(() => {
+    const stored = localStorage.getItem("leetcode_tracker_reminder");
+    if (stored) {
+      try {
+        setReminder(JSON.parse(stored));
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, []);
 
   // ── Auth guard ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -214,11 +241,19 @@ export default function Dashboard() {
       leetcodeUsername={leetcodeUsername}
       lastSynced={lastSynced}
       isRefreshing={isRefreshing}
+      onOpenReminder={() => setReminderModalOpen(true)}
     >
       {/* ── Change Username Modal ─────────────────────────────────────────── */}
       <ChangeUsernameModal
         isOpen={changeModalOpen}
         onClose={() => setChangeModalOpen(false)}
+      />
+
+      {/* ── Reminder Modal ────────────────────────────────────────────────── */}
+      <ReminderModal
+        isOpen={reminderModalOpen}
+        onClose={() => setReminderModalOpen(false)}
+        onSave={(settings) => setReminder(settings)}
       />
 
       {/* ── Not Connected → show Connect Card ─────────────────────────────── */}
@@ -244,7 +279,7 @@ export default function Dashboard() {
         <div className="space-y-6">
 
           {/* ── Welcome Banner ──────────────────────────────────────────────── */}
-          <div className="rounded-2xl border border-[var(--border)] bg-gradient-to-r from-violet-500/10 via-purple-500/5 to-transparent p-5 flex items-center gap-4">
+          <div className="rounded-2xl border border-[var(--border)] bg-gradient-to-r from-violet-500/10 via-purple-500/5 to-transparent p-5 flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xl font-extrabold shadow-lg shadow-violet-500/30 flex-shrink-0">
               {appUsername.slice(0, 1).toUpperCase() || "U"}
             </div>
@@ -265,21 +300,59 @@ export default function Dashboard() {
               )}
             </div>
             {/* Quick Actions in banner */}
-            <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+            <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto mt-3 sm:mt-0">
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
-                className="px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--code-bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200 disabled:opacity-60"
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--code-bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200 disabled:opacity-60 flex-1 sm:flex-initial"
               >
                 {isRefreshing ? "Refreshing…" : "⟳ Refresh"}
               </button>
               <button
                 onClick={() => setChangeModalOpen(true)}
-                className="px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--code-bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200"
+                className="px-4 py-2 text-xs font-semibold rounded-xl bg-[var(--code-bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200 flex-1 sm:flex-initial"
               >
                 ✎ Change Username
               </button>
             </div>
+          </div>
+
+          {/* ── Reminder Banner/Card ────────────────────────────────────────── */}
+          <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-lg flex-shrink-0">
+                🔔
+              </div>
+              <div className="min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text)]">LeetCode Reminder</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-sm font-extrabold text-[var(--text-h)] flex items-center gap-2">
+                    {reminder ? (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                        🟢 {reminder.frequency} • {formatTime12h(reminder.time)}
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />
+                        ⚪ No Reminder Configured
+                      </>
+                    )}
+                  </span>
+                </div>
+                {reminder && (
+                  <p className="text-xs text-[var(--text)] italic mt-1 leading-normal truncate max-w-lg">
+                    "{reminder.message}"
+                  </p>
+                )}
+              </div>
+            </div>
+            <button
+              onClick={() => setReminderModalOpen(true)}
+              className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200 shadow-sm active:scale-[0.98] w-full sm:w-auto flex-shrink-0"
+            >
+              {reminder ? "Edit Reminder" : "Set Reminder"}
+            </button>
           </div>
 
           {/* ── Tabs Navigation ──────────────────────────────────────────────── */}

@@ -17,7 +17,7 @@ function ProblemList({ problems, onDelete, onEdit }) {
   }
 
   return (
-    <div style={styles.grid}>
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 py-4 text-left w-full">
       {problems.map((problem) => (
         <ProblemCard 
           key={problem.id} 
@@ -29,33 +29,5 @@ function ProblemList({ problems, onDelete, onEdit }) {
     </div>
   );
 }
-
-const styles = {
-  grid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-    gap: "24px",
-    padding: "16px 0",
-    textAlign: "left",
-  },
-  emptyState: {
-    background: "var(--code-bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    padding: "48px 24px",
-    textAlign: "center",
-    margin: "24px 0",
-  },
-  emptyText: {
-    fontSize: "18px",
-    fontWeight: "600",
-    color: "var(--text-h)",
-    marginBottom: "8px",
-  },
-  emptySubtext: {
-    fontSize: "14px",
-    color: "var(--text)",
-  },
-};
 
 export default ProblemList;

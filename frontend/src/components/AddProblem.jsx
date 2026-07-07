@@ -82,39 +82,39 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
   };
 
   return (
-    <div style={styles.container}>
-      <h3 style={styles.title}>
+    <div className="w-full max-w-2xl mx-auto mb-8 text-left bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-md">
+      <h3 className="text-lg font-bold text-[var(--text-h)] mb-4">
         {editingProblem ? "Edit Tracked Problem" : "Track New Problem"}
       </h3>
-      {error && <div style={styles.error}>{error}</div>}
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <div style={styles.row}>
+      {error && <div className="text-red-500 text-sm font-semibold mb-3">{error}</div>}
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <input
             type="text"
             placeholder="Problem Title (e.g., Two Sum)"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            style={styles.input}
             required
             disabled={isSubmitting}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
           />
           <input
             type="text"
             placeholder="Topic (e.g., Array, DP)"
             value={topic}
             onChange={(e) => setTopic(e.target.value)}
-            style={styles.input}
             required
             disabled={isSubmitting}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
           />
         </div>
 
-        <div style={styles.row}>
+        <div className="flex flex-col sm:flex-row gap-4">
           <select
             value={difficulty}
             onChange={(e) => setDifficulty(e.target.value)}
-            style={styles.select}
             disabled={isSubmitting}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px] cursor-pointer"
           >
             <option value="Easy">Easy</option>
             <option value="Medium">Medium</option>
@@ -124,8 +124,8 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            style={styles.select}
             disabled={isSubmitting}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px] cursor-pointer"
           >
             <option value="To Do">To Do</option>
             <option value="Attempting">Attempting</option>
@@ -138,28 +138,32 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
           placeholder="LeetCode Link (https://...)"
           value={leetcodeLink}
           onChange={(e) => setLeetcodeLink(e.target.value)}
-          style={styles.inputFull}
           disabled={isSubmitting}
+          className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[44px]"
         />
 
         <textarea
           placeholder="Notes, thoughts, or approach..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          style={styles.textarea}
           disabled={isSubmitting}
+          className="w-full px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/20 transition-all duration-200 min-h-[100px] resize-none"
         />
 
-        <div style={styles.buttonGroup}>
-          <button type="submit" disabled={isSubmitting} style={{ ...styles.button, opacity: isSubmitting ? 0.7 : 1, cursor: isSubmitting ? "not-allowed" : "pointer" }}>
+        <div className="flex flex-col sm:flex-row gap-3 mt-2">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 py-3 px-5 rounded-xl bg-[var(--accent)] text-white text-sm font-bold shadow-md hover:shadow-violet-500/20 active:scale-[0.98] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+          >
             {isSubmitting ? "Saving..." : (editingProblem ? "Update Problem" : "Add Problem")}
           </button>
           {editingProblem && (
             <button
               type="button"
               onClick={() => setEditingProblem(null)}
-              style={styles.cancelButton}
               disabled={isSubmitting}
+              className="flex-1 py-3 px-5 rounded-xl border border-[var(--border)] text-[var(--text-h)] text-sm font-bold hover:bg-[var(--bg)] transition-all duration-200 min-h-[44px] flex items-center justify-center cursor-pointer"
             >
               Cancel
             </button>
@@ -169,117 +173,5 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
     </div>
   );
 }
-
-const styles = {
-  container: {
-    background: "var(--code-bg)",
-    border: "1px solid var(--border)",
-    borderRadius: "12px",
-    padding: "24px",
-    maxWidth: "600px",
-    margin: "0 auto 32px auto",
-    textAlign: "left",
-    boxShadow: "var(--shadow)",
-  },
-  title: {
-    margin: "0 0 16px 0",
-    color: "var(--text-h)",
-    fontWeight: "600",
-    fontSize: "20px",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  row: {
-    display: "flex",
-    gap: "12px",
-  },
-  input: {
-    flex: 1,
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid var(--border)",
-    background: "var(--bg)",
-    color: "var(--text-h)",
-    fontFamily: "var(--sans)",
-    fontSize: "14px",
-    outline: "none",
-  },
-  inputFull: {
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid var(--border)",
-    background: "var(--bg)",
-    color: "var(--text-h)",
-    fontFamily: "var(--sans)",
-    fontSize: "14px",
-    outline: "none",
-  },
-  select: {
-    flex: 1,
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid var(--border)",
-    background: "var(--bg)",
-    color: "var(--text-h)",
-    fontFamily: "var(--sans)",
-    fontSize: "14px",
-    outline: "none",
-    cursor: "pointer",
-  },
-  textarea: {
-    padding: "10px 14px",
-    borderRadius: "8px",
-    border: "1px solid var(--border)",
-    background: "var(--bg)",
-    color: "var(--text-h)",
-    fontFamily: "var(--sans)",
-    fontSize: "14px",
-    minHeight: "80px",
-    outline: "none",
-    resize: "vertical",
-  },
-  button: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "none",
-    background: "var(--accent)",
-    color: "#fff",
-    fontFamily: "var(--sans)",
-    fontWeight: "600",
-    fontSize: "15px",
-    cursor: "pointer",
-    textAlign: "center",
-    transition: "opacity 0.2s",
-    flex: 1,
-  },
-  cancelButton: {
-    padding: "12px",
-    borderRadius: "8px",
-    border: "1px solid var(--border)",
-    background: "transparent",
-    color: "var(--text-h)",
-    fontFamily: "var(--sans)",
-    fontWeight: "600",
-    fontSize: "15px",
-    cursor: "pointer",
-    textAlign: "center",
-    transition: "opacity 0.2s, background 0.2s",
-    flex: 1,
-  },
-  buttonGroup: {
-    display: "flex",
-    gap: "12px",
-    marginTop: "8px",
-  },
-  error: {
-    color: "#ef4444",
-    fontSize: "14px",
-    marginBottom: "12px",
-    fontWeight: "500",
-  },
-};
 
 export default AddProblem;
