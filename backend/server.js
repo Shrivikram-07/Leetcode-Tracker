@@ -34,7 +34,8 @@ app.use(limiter);
 const allowedOrigins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "http://localhost:5000"
+    "http://localhost:5000",
+    "https://leetcode-tracker-silk.vercel.app"
 ];
 
 if (process.env.FRONTEND_URL) {
@@ -70,9 +71,9 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 const server = app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT} - server.js:73`);
+    console.log(`Server running on port ${PORT} - server.js:74`);
 });
 
 server.on("error", (err) => {
-    console.log("SERVER ERROR: - server.js:77", err);
+    console.log("SERVER ERROR: - server.js:78", err);
 });
