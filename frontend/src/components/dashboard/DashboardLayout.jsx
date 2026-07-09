@@ -31,11 +31,21 @@ export default function DashboardLayout({
     navigate("/");
   };
 
-  // Prevent body scrolling while open
+  // Prevent body scrolling while open on mobile only
   useEffect(() => {
-    document.body.style.overflow = sidebarOpen ? "hidden" : "";
+    const handleBodyScroll = () => {
+      if (sidebarOpen && window.innerWidth < 1024) {
+        document.body.style.overflow = "hidden";
+      } else {
+        document.body.style.overflow = "";
+      }
+    };
+
+    handleBodyScroll();
+    window.addEventListener("resize", handleBodyScroll);
     return () => {
       document.body.style.overflow = "";
+      window.removeEventListener("resize", handleBodyScroll);
     };
   }, [sidebarOpen]);
 
@@ -63,10 +73,10 @@ export default function DashboardLayout({
 
   return (
     <div className="flex min-h-screen bg-[var(--bg)] w-full overflow-x-hidden">
-      {/* Backdrop */}
+      {/* Backdrop overlay (z-[90] is above TopNav and below Sidebar) */}
       <div
-        className={`fixed inset-0 bg-black/60 z-40 lg:hidden transition-opacity ${
-          sidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm transition-all duration-300 lg:hidden z-[90] ${
+          sidebarOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
         }`}
         onClick={() => setSidebarOpen(false)}
       />
@@ -88,7 +98,7 @@ export default function DashboardLayout({
           leetcodeUsername={leetcodeUsername}
           lastSynced={lastSynced}
           isRefreshing={isRefreshing}
-          onMenuToggle={() => setSidebarOpen(true)}
+          onMenuToggle={() => setSidebarOpen((prev) => !prev)}
           onOpenReminder={onOpenReminder}
         />
 

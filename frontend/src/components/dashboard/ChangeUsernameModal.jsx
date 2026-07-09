@@ -19,6 +19,18 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // Prevent body scroll when modal is open on mobile
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [isOpen]);
+
   // Accessibility: Close on Escape key
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -87,7 +99,7 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
               initial="hidden"
               animate="visible"
               exit="exit"
-              className="pointer-events-auto w-full max-w-sm rounded-t-3xl md:rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6 h-[80vh] md:h-auto max-h-[80vh] md:max-h-none flex flex-col overflow-hidden"
+              className="pointer-events-auto w-full max-w-sm rounded-t-3xl md:rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-4 md:p-6 h-[80vh] md:h-auto max-h-[80vh] md:max-h-none flex flex-col overflow-hidden"
             >
               {/* Header */}
               <div className="flex items-center justify-between mb-5 flex-shrink-0">

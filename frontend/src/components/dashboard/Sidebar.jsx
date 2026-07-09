@@ -1,5 +1,4 @@
 import { NavLink } from "react-router-dom";
-import { motion } from "framer-motion";
 import {
   Squares2X2Icon,
   UserCircleIcon,
@@ -14,14 +13,29 @@ const NAV_ITEMS = [
 
 export default function Sidebar({ theme, onToggleTheme, onLogout, isOpen, onClose }) {
   return (
-    <motion.aside
-      initial={{ x: -20, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-      className={`fixed top-0 left-0 h-screen border-r border-[var(--border)] bg-[var(--bg)] flex flex-col z-50 transition-transform duration-300 
-        w-[75vw] max-w-[300px] lg:w-60
-        ${isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"}
+    <aside
+      className={`
+        fixed
+        top-0
+        left-0
+        z-[100]
+        h-screen
+        w-[85vw]
+        max-w-[320px]
+        bg-[var(--bg)]
+        border-r
+        border-[var(--border)]
+        flex
+        flex-col
+        transform
+        transition-transform
+        duration-300
+        ease-in-out
+        lg:static
         lg:translate-x-0
+        lg:w-60
+        lg:max-w-none
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}
     >
       {/* Logo & Close Button */}
@@ -81,7 +95,10 @@ export default function Sidebar({ theme, onToggleTheme, onLogout, isOpen, onClos
       {/* Bottom actions */}
       <div className="px-3 py-4 border-t border-[var(--border)] space-y-1">
         <button
-          onClick={onToggleTheme}
+          onClick={() => {
+            onToggleTheme();
+            onClose();
+          }}
           className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm font-medium text-[var(--text)] hover:bg-[var(--code-bg)] hover:text-[var(--text-h)] transition-all duration-200 min-h-[48px]"
         >
           <span className="text-lg leading-none">{theme === "dark" ? "☀️" : "🌙"}</span>
@@ -95,6 +112,6 @@ export default function Sidebar({ theme, onToggleTheme, onLogout, isOpen, onClos
           <span>Log Out</span>
         </button>
       </div>
-    </motion.aside>
+    </aside>
   );
 }

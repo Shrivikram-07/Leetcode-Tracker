@@ -21,12 +21,12 @@ function App() {
   return (
     <BrowserRouter>
       <Toaster position="top-center" />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/Register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/Profile" element={<Profile />} />
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/profile" element={<Profile />} />
+        </Routes>
     </BrowserRouter>
   );
 }

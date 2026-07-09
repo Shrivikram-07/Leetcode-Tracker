@@ -25,7 +25,7 @@ export default function TopNav({
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-0 z-40 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md min-h-[73px]"
+      className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md min-h-[73px]"
     >
       {/* Mobile view (<1024px): Hamburger & Logo */}
       <div className="flex items-center gap-3 lg:hidden">
