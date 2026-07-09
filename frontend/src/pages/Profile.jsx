@@ -166,7 +166,7 @@ function Profile() {
       {loading ? (
         <p className="text-sm text-[var(--text)]">Loading Profile...</p>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl lg:max-w-none mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
           {/* Native Profile Card */}
           <div className="glass-panel p-6 sm:p-8 text-left animate-slide-up hover-lift">
             <h3 className="text-xl sm:text-2xl font-extrabold text-[var(--text-h)] pb-3 mb-5 border-b border-[var(--glass-border)] gradient-text">

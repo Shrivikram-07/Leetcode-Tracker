@@ -37,7 +37,7 @@ export default function ConnectCard() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-        className="w-full max-w-md"
+        className="w-full"
       >
         {/* Card */}
         <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-8 shadow-xl shadow-black/5">

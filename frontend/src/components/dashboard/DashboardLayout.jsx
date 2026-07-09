@@ -107,9 +107,9 @@ export default function DashboardLayout({
         />
 
         {/* Page content */}
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+        <main className="flex-1 py-4 md:py-6 lg:py-8 overflow-y-auto">
           {/* Mobile title banner */}
-          <div className="mb-6 lg:hidden animate-fade-in">
+          <div className="mb-6 lg:hidden animate-fade-in px-4 md:px-6">
             <h1 className="text-xl font-bold text-[var(--text-h)] leading-none mb-1.5">
               Analytics Dashboard
             </h1>
@@ -130,7 +130,7 @@ export default function DashboardLayout({
             </p>
           </div>
 
-          <div className="w-full max-w-[1400px] mx-auto">
+          <div className="mx-auto max-w-7xl w-full px-4 md:px-6 lg:px-8">
             {children}
           </div>
         </main>
