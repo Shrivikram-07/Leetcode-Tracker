@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { XMarkIcon, BellIcon } from "@heroicons/react/24/outline";
 import toast from "react-hot-toast";
 
-export default function ReminderModal({ isOpen, onClose, onSave }) {
+export default function ReminderModal({ isOpen, onClose, onSave, userId }) {
   const [time, setTime] = useState("19:00");
   const [frequency, setFrequency] = useState("Daily");
   const [message, setMessage] = useState("Time to solve today's LeetCode problem!");
@@ -20,8 +20,8 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
 
   // Load from localStorage on open
   useEffect(() => {
-    if (isOpen) {
-      const stored = localStorage.getItem("leetcode_tracker_reminder");
+    if (isOpen && userId) {
+      const stored = localStorage.getItem(`leetcode_tracker_reminder_${userId}`);
       if (stored) {
         try {
           const parsed = JSON.parse(stored);
@@ -38,7 +38,7 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
         setMessage("Time to solve today's LeetCode problem!");
       }
     }
-  }, [isOpen]);
+  }, [isOpen, userId]);
 
   // Prevent body scroll when modal is open on mobile
   useEffect(() => {
@@ -73,8 +73,10 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!userId) return;
 
-    const existing = localStorage.getItem("leetcode_tracker_reminder");
+    const key = `leetcode_tracker_reminder_${userId}`;
+    const existing = localStorage.getItem(key);
     
     const settings = {
       enabled: true,
@@ -83,7 +85,7 @@ export default function ReminderModal({ isOpen, onClose, onSave }) {
       message: message.trim() || "Time to solve today's LeetCode problem!"
     };
 
-    localStorage.setItem("leetcode_tracker_reminder", JSON.stringify(settings));
+    localStorage.setItem(key, JSON.stringify(settings));
 
     if (existing) {
       toast.success("Reminder updated successfully!");

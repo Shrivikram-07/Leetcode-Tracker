@@ -1,9 +1,11 @@
 import { useState } from "react";
 import api from "../api";
 import { useNavigate, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 function Login() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,6 +23,7 @@ function Login() {
       });
 
       localStorage.setItem("token", res.data.token);
+      queryClient.clear();
 
       setSuccess(true);
       setTimeout(() => {

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Sidebar from "./Sidebar";
 import TopNav from "./TopNav";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
@@ -13,6 +14,7 @@ export default function DashboardLayout({
   children,
 }) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [theme, setTheme] = useState(
     document.documentElement.getAttribute("data-theme") || "light"
   );
@@ -27,6 +29,8 @@ export default function DashboardLayout({
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("leetcode_tracker_reminder");
+    queryClient.clear();
     setSidebarOpen(false);
     navigate("/");
   };

@@ -22,6 +22,7 @@ export default function ConnectCard() {
       toast.success("Account connected successfully!", { id: toastId });
       // Invalidate so the dashboard re-fetches
       await queryClient.invalidateQueries({ queryKey: ["leetcodeProfile"] });
+      await queryClient.invalidateQueries({ queryKey: ["analytics"] });
     } catch (err) {
       const msg = err.response?.data?.message || "Invalid username or network error";
       toast.error(msg, { id: toastId });

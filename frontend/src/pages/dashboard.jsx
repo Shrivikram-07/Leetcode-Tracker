@@ -121,17 +121,25 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
-  // Load reminder settings from localStorage
+  // Load reminder settings from localStorage when userId is available
+  const userId = dashboardUser?.userId;
   useEffect(() => {
-    const stored = localStorage.getItem("leetcode_tracker_reminder");
-    if (stored) {
-      try {
-        setReminder(JSON.parse(stored));
-      } catch (e) {
-        console.error(e);
+    if (userId) {
+      const stored = localStorage.getItem(`leetcode_tracker_reminder_${userId}`);
+      if (stored) {
+        try {
+          setReminder(JSON.parse(stored));
+        } catch (e) {
+          console.error(e);
+          setReminder(null);
+        }
+      } else {
+        setReminder(null);
       }
+    } else {
+      setReminder(null);
     }
-  }, []);
+  }, [userId]);
 
   // ── Auth guard ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -254,6 +262,7 @@ export default function Dashboard() {
         isOpen={reminderModalOpen}
         onClose={() => setReminderModalOpen(false)}
         onSave={(settings) => setReminder(settings)}
+        userId={userId}
       />
 
       {/* ── Not Connected → show Connect Card ─────────────────────────────── */}

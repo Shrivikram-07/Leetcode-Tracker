@@ -11,11 +11,13 @@ import {
   ResponsiveContainer
 } from "recharts";
 
+import { useQueryClient } from "@tanstack/react-query";
 import DashboardLayout from "../components/dashboard/DashboardLayout";
 import ReminderModal from "../components/dashboard/ReminderModal";
 
 function Profile() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [profileData, setProfileData] = useState(null);
   
   // Leetcode specific states
@@ -99,6 +101,7 @@ function Profile() {
     try {
       await api.post("/leetcode/connect", { leetcode_username: connectUsername });
       alert("LeetCode account connected successfully!");
+      queryClient.invalidateQueries();
       setLoading(true);
       await fetchProfile(); // re-fetch everything
     } catch (err) {
@@ -113,6 +116,7 @@ function Profile() {
     try {
       await fetchLeetcodeData(true);
       alert("LeetCode profile synced successfully!");
+      queryClient.invalidateQueries();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to sync with LeetCode.");
     } finally {
@@ -125,6 +129,7 @@ function Profile() {
     try {
       const res = await api.post("/leetcode/import");
       alert(res.data.message || "Import completed successfully!");
+      queryClient.invalidateQueries();
     } catch (err) {
       alert(err.response?.data?.message || "Failed to import problems");
     } finally {
@@ -157,7 +162,7 @@ function Profile() {
       isRefreshing={isSyncing}
       onOpenReminder={() => setReminderModalOpen(true)}
     >
-      <ReminderModal isOpen={reminderModalOpen} onClose={() => setReminderModalOpen(false)} />
+      <ReminderModal isOpen={reminderModalOpen} onClose={() => setReminderModalOpen(false)} userId={profileData?.id} />
       {loading ? (
         <p className="text-sm text-[var(--text)]">Loading Profile...</p>
       ) : (

@@ -57,6 +57,7 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
       await api.put("/leetcode/change", { leetcode_username: trimmed });
       toast.success("Username changed successfully!", { id: toastId });
       await queryClient.invalidateQueries({ queryKey: ["leetcodeProfile"] });
+      await queryClient.invalidateQueries({ queryKey: ["analytics"] });
       setUsername("");
       onClose();
     } catch (err) {
