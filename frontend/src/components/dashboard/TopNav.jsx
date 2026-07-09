@@ -25,8 +25,9 @@ export default function TopNav({
       initial={{ y: -10, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="sticky top-0 z-30 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md min-h-[73px]"
+      className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg)]/80 backdrop-blur-md min-h-[73px] flex items-center w-full"
     >
+      <div className="w-full max-w-[1400px] mx-auto flex items-center justify-between px-4 md:px-6 lg:px-8 py-3 sm:py-4">
       {/* Mobile view (<1024px): Hamburger & Logo */}
       <div className="flex items-center gap-3 lg:hidden">
         <button
@@ -85,6 +86,7 @@ export default function TopNav({
         <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-violet-500/30 flex-shrink-0">
           {initials}
         </div>
+      </div>
       </div>
     </motion.header>
   );

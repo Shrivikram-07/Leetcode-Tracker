@@ -130,7 +130,9 @@ export default function DashboardLayout({
             </p>
           </div>
 
-          {children}
+          <div className="w-full max-w-[1400px] mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

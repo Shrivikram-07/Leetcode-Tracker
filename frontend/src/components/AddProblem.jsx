@@ -82,7 +82,7 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto mb-8 text-left bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-md">
+    <div className="w-full max-w-2xl lg:max-w-none mx-auto mb-8 text-left bg-[var(--code-bg)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 shadow-md">
       <h3 className="text-lg font-bold text-[var(--text-h)] mb-4">
         {editingProblem ? "Edit Tracked Problem" : "Track New Problem"}
       </h3>
