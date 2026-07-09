@@ -121,6 +121,21 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
+  // ── Data queries ────────────────────────────────────────────────────────────
+  const {
+    data: lcData,
+    isLoading: lcLoading,
+    error: lcError,
+  } = useLeetcodeData();
+
+  const {
+    data: dashboardUser,
+    isLoading: userLoading,
+    error: userError,
+  } = useDashboardUser();
+
+  const { data: problems = [], refetch: refetchProblems } = useProblems();
+
   // Load reminder settings from localStorage when userId is available
   const userId = dashboardUser?.userId;
   useEffect(() => {
@@ -145,21 +160,6 @@ export default function Dashboard() {
   useEffect(() => {
     if (!localStorage.getItem("token")) navigate("/");
   }, [navigate]);
-
-  // ── Data queries ────────────────────────────────────────────────────────────
-  const {
-    data: lcData,
-    isLoading: lcLoading,
-    error: lcError,
-  } = useLeetcodeData();
-
-  const {
-    data: dashboardUser,
-    isLoading: userLoading,
-    error: userError,
-  } = useDashboardUser();
-
-  const { data: problems = [], refetch: refetchProblems } = useProblems();
 
   // Auth error redirect
   useEffect(() => {
