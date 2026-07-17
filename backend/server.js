@@ -22,13 +22,8 @@ app.use((req, res, next) => {
 /* ---------------- SECURITY MIDDLEWARE ---------------- */
 app.use(helmet());
 
-const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
-    max: 100,
-    message: "Too many requests from this IP, please try again after 15 minutes"
-});
-
-app.use(limiter);
+// Trust proxy for reverse proxies (like Render/Vercel)
+app.set("trust proxy", 1);
 
 /* ---------------- CORS ---------------- */
 const allowedOrigins = [
@@ -47,6 +42,40 @@ app.use(cors({
     origin: "https://leetcode-tracker-silk.vercel.app",
     credentials: true
 }));
+
+/* ---------------- RATE LIMITERS ---------------- */
+
+// Strict rate limiter for auth routes
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20,
+    message: { message: "Too many login or registration attempts, please try again after 15 minutes" },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => req.method === "OPTIONS"
+});
+
+// Relaxed rate limiter for dashboard/API routes
+const apiLimiter = rateLimit({
+    windowMs: 1 * 60 * 1000, // 1 minute
+    max: 300,
+    message: { message: "Too many requests, please try again after a minute" },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skip: (req) => {
+        // Skip preflight requests
+        if (req.method === "OPTIONS") return true;
+        
+        // Skip auth routes as they have their own strict limiter
+        const path = req.originalUrl.split("?")[0];
+        return path === "/api/users/login" || path === "/api/users/register";
+    }
+});
+
+// Apply rate limiters
+app.use("/api/users/login", authLimiter);
+app.use("/api/users/register", authLimiter);
+app.use(apiLimiter);
 
 /* ---------------- BODY PARSER ---------------- */
 app.use(express.json());
