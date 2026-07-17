@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 // Hooks
 import { useLeetcodeData } from "../hooks/useLeetcodeData";
