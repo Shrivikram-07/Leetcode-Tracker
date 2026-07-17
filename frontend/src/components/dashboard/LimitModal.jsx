@@ -45,8 +45,8 @@ export default function LimitModal({ isOpen, onClose }) {
               <h3 className="text-lg font-bold text-[var(--text-h)] mb-2">
                 Track Limit Reached
               </h3>
-              <p className="text-base font-extrabold text-[var(--accent)] mb-3 leading-snug">
-                You can only track up to 15 custom problems.
+              <p className="text-sm font-semibold text-[var(--text-h)] mb-4 leading-normal">
+                You have reached the maximum limit of 15 tracked problems. Delete an existing problem before adding a new one.
               </p>
               <p className="text-xs text-[var(--text)] leading-relaxed mb-6">
                 Upgrade to Premium to track unlimited problems, access advanced analytics, and get personalized AI interview predictions.

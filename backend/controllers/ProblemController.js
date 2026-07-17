@@ -1,5 +1,23 @@
 const db = require("../config/db");
 
+const mapDifficulty = (diff) => {
+    if (!diff) return "Easy";
+    const d = diff.toLowerCase();
+    if (d === "easy") return "Easy";
+    if (d === "medium") return "Medium";
+    if (d === "hard") return "Hard";
+    return "Easy";
+};
+
+const sanitizeTopic = (topic) => {
+    if (!topic) return "General";
+    let cleaned = topic.trim().replace(/^#+/, ""); // strip leading #
+    if (!cleaned || cleaned.toLowerCase() === "unknown") {
+        return "General";
+    }
+    return cleaned;
+};
+
 // CREATE PROBLEM
 const createProblem = (req, res) => {
     try {
@@ -11,6 +29,11 @@ const createProblem = (req, res) => {
                 message: "Title, difficulty, and topic are required"
             });
         }
+
+        const finalTitle = title.trim();
+        const finalDifficulty = mapDifficulty(difficulty);
+        const finalTopic = sanitizeTopic(topic);
+        const finalStatus = status ? status.trim() : "Not Started";
 
         db.query(
             "SELECT COUNT(*) AS count FROM problems WHERE user_id = ?",
@@ -24,8 +47,8 @@ const createProblem = (req, res) => {
                 }
 
                 if (countResult && countResult[0] && countResult[0].count >= 15) {
-                    return res.status(403).json({
-                        message: "You can only track up to 15 custom problems."
+                    return res.status(400).json({
+                        message: "You have reached the maximum limit of 15 tracked problems. Delete an existing problem before adding a new one."
                     });
                 }
 
@@ -36,12 +59,12 @@ const createProblem = (req, res) => {
 
                 db.query(
                     sql,
-                    [title, difficulty, topic, status || "To Do", leetcode_link || null, notes || null, userId],
+                    [finalTitle, finalDifficulty, finalTopic, finalStatus, leetcode_link || null, notes || null, userId],
                     (err, result) => {
                         if (err) {
                             console.log("Create Problem Error:", err);
                             return res.status(500).json({
-                                                            message: "Database Error"
+                                message: "Database Error"
                             });
                         }
 
@@ -77,7 +100,14 @@ const getProblems = (req, res) => {
                     });
                 }
 
-                res.status(200).json(results);
+                const sanitizedResults = results.map(p => ({
+                    ...p,
+                    difficulty: mapDifficulty(p.difficulty),
+                    topic: sanitizeTopic(p.topic),
+                    status: p.status === "To Do" ? "Not Started" : (p.status === "Attempting" ? "Attempted" : (p.status || "Not Started"))
+                }));
+
+                res.status(200).json(sanitizedResults);
             }
         );
     } catch (error) {
@@ -111,7 +141,15 @@ const getProblem = (req, res) => {
                     });
                 }
 
-                res.status(200).json(result[0]);
+                const p = result[0];
+                const sanitized = {
+                    ...p,
+                    difficulty: mapDifficulty(p.difficulty),
+                    topic: sanitizeTopic(p.topic),
+                    status: p.status === "To Do" ? "Not Started" : (p.status === "Attempting" ? "Attempted" : (p.status || "Not Started"))
+                };
+
+                res.status(200).json(sanitized);
             }
         );
     } catch (error) {
@@ -135,6 +173,12 @@ const updateProblem = (req, res) => {
             });
         }
 
+        const finalTitle = title.trim();
+        const finalDifficulty = mapDifficulty(difficulty);
+        const finalTopic = sanitizeTopic(topic);
+        const finalStatus = status ? status.trim() : "Not Started";
+        const mappedStatus = finalStatus === "To Do" ? "Not Started" : (finalStatus === "Attempting" ? "Attempted" : finalStatus);
+
         const sql = `
             UPDATE problems
             SET title = ?, difficulty = ?, topic = ?, status = ?, leetcode_link = ?, notes = ?
@@ -143,7 +187,7 @@ const updateProblem = (req, res) => {
 
         db.query(
             sql,
-            [title, difficulty, topic, status || "To Do", leetcode_link || null, notes || null, problemId, userId],
+            [finalTitle, finalDifficulty, finalTopic, mappedStatus, leetcode_link || null, notes || null, problemId, userId],
             (err, result) => {
                 if (err) {
                     console.log("Update Problem Error:", err);

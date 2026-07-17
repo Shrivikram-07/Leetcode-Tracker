@@ -163,6 +163,14 @@ export default function Dashboard() {
   const [reminderModalOpen, setReminderModalOpen] = useState(false);
   const [reminder, setReminder] = useState(null);
   const [editingProblem, setEditingProblem] = useState(null);
+
+  const handleEditProblem = (problem) => {
+    setEditingProblem(problem);
+    const formElement = document.getElementById("add-problem-form");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
   const [searchQuery, setSearchQuery] = useState("");
   const [filterDifficulty, setFilterDifficulty] = useState("");
   const [filterStatus, setFilterStatus] = useState("");
@@ -363,8 +371,9 @@ export default function Dashboard() {
 
   const filteredProblems = problems.filter((p) => {
     const q = searchQuery.toLowerCase();
-    const matchSearch =
-      (p.title?.toLowerCase().includes(q) || p.topic?.toLowerCase().includes(q));
+    const titleMatch = p.title ? p.title.toLowerCase().includes(q) : false;
+    const topicMatch = p.topic ? p.topic.toLowerCase().includes(q) : false;
+    const matchSearch = titleMatch || topicMatch;
     return (
       matchSearch &&
       (!filterDifficulty || p.difficulty === filterDifficulty) &&
@@ -398,7 +407,8 @@ export default function Dashboard() {
     if (!window.confirm("Delete this problem?")) return;
     try {
       await api.delete(`/problems/${id}`);
-      refetchProblems();
+      await queryClient.invalidateQueries({ queryKey: ["problems"] });
+      toast.success("Problem deleted successfully");
     } catch {
       toast.error("Failed to delete problem.");
     }
@@ -407,8 +417,8 @@ export default function Dashboard() {
   // ── Local tracker stats ────────────────────────────────────────────────────
   const totalProblems = problems.length;
   const solvedLocal = problems.filter((p) => p.status === "Solved").length;
-  const attempting = problems.filter((p) => p.status === "Attempting").length;
-  const todo = problems.filter((p) => p.status === "To Do").length;
+  const attempting = problems.filter((p) => p.status === "Attempted").length;
+  const todo = problems.filter((p) => p.status === "Not Started").length;
   const easyLocal = problems.filter((p) => p.difficulty === "Easy").length;
   const mediumLocal = problems.filter((p) => p.difficulty === "Medium").length;
   const hardLocal = problems.filter((p) => p.difficulty === "Hard").length;
@@ -666,8 +676,8 @@ export default function Dashboard() {
                     {[
                       { label: "Tracked", value: totalProblems, color: "text-[var(--accent)]" },
                       { label: "Solved", value: solvedLocal, color: "text-emerald-500" },
-                      { label: "Attempting", value: attempting, color: "text-amber-500" },
-                      { label: "To Do", value: todo, color: "text-[var(--text)]" },
+                      { label: "Attempted", value: attempting, color: "text-amber-500" },
+                      { label: "Not Started", value: todo, color: "text-[var(--text)]" },
                       { label: "Solve %", value: totalProblems > 0 ? `${Math.round((solvedLocal / totalProblems) * 100)}%` : "0%", color: "text-blue-500" },
                     ].map((s) => (
                       <div key={s.label} className="rounded-xl border border-[var(--border)] bg-[var(--bg)] p-3 text-center">
@@ -699,7 +709,7 @@ export default function Dashboard() {
           {/* Add Problem */}
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5">
             <AddProblem
-              onProblemAdded={refetchProblems}
+              onProblemAdded={() => queryClient.invalidateQueries({ queryKey: ["problems"] })}
               editingProblem={editingProblem}
               setEditingProblem={setEditingProblem}
               problemCount={problems.length}
@@ -723,7 +733,7 @@ export default function Dashboard() {
                 placeholder="Search title or topic…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] transition-all duration-200 w-full max-w-xs"
+                className="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm placeholder:text-[var(--text)] focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 transition-all duration-200 w-full max-w-xs"
               />
             </div>
 
@@ -738,7 +748,7 @@ export default function Dashboard() {
                 {
                   value: filterStatus,
                   onChange: setFilterStatus,
-                  options: [["", "All Statuses"], ["To Do", "To Do"], ["Attempting", "Attempting"], ["Solved", "Solved"]],
+                  options: [["", "All Statuses"], ["Not Started", "Not Started"], ["Attempted", "Attempted"], ["Solved", "Solved"]],
                 },
                 {
                   value: filterTopic,
@@ -750,7 +760,7 @@ export default function Dashboard() {
                   key={i}
                   value={f.value}
                   onChange={(e) => f.onChange(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] transition-all duration-200 cursor-pointer"
+                  className="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg)] text-[var(--text-h)] text-sm focus:outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)]/10 transition-all duration-200 cursor-pointer"
                 >
                   {f.options.map(([val, label]) => (
                     <option key={val} value={val}>{label}</option>
@@ -775,7 +785,7 @@ export default function Dashboard() {
             <ProblemList
               problems={filteredProblems}
               onDelete={handleDeleteProblem}
-              onEdit={setEditingProblem}
+              onEdit={handleEditProblem}
             />
           </div>
         </div>

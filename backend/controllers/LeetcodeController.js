@@ -1,6 +1,24 @@
 const db = require("../config/db");
 const leetcodeService = require("../services/leetcodeService");
 
+const mapDifficulty = (diff) => {
+    if (!diff) return "Easy";
+    const d = diff.toLowerCase();
+    if (d === "easy") return "Easy";
+    if (d === "medium") return "Medium";
+    if (d === "hard") return "Hard";
+    return "Easy";
+};
+
+const sanitizeTopic = (topic) => {
+    if (!topic) return "General";
+    let cleaned = topic.trim().replace(/^#+/, ""); // strip leading #
+    if (!cleaned || cleaned.toLowerCase() === "unknown") {
+        return "General";
+    }
+    return cleaned;
+};
+
 // CONNECT LEETCODE ACCOUNT
 const connectAccount = async (req, res) => {
     try {
@@ -180,9 +198,21 @@ const importProblems = async (req, res) => {
                         let updatedImports = 0;
                         let addedTitles = [];
                         let updatedTitles = [];
+
+                        // STEP 4: Fetch details for new problems in parallel
+                        const newProblems = problemsToImport.filter(p => !existingMap.has(p.title));
+                        const detailsList = await Promise.all(
+                            newProblems.map(async (p) => {
+                                const titleSlug = p.titleSlug || p.title.toLowerCase().replace(/\s+/g, "-");
+                                const details = await leetcodeService.getProblemDetails(titleSlug);
+                                return { title: p.title, details };
+                            })
+                        );
+                        const detailsMap = new Map(detailsList.map(item => [item.title, item.details]));
+
                         const tasks = [];
 
-                        // STEP 4: Sync logic
+                        // STEP 5: Sync logic
                         for (const p of problemsToImport) {
                             const title = p.title;
                             const titleSlug = p.titleSlug || title.toLowerCase().replace(/\s+/g, "-");
@@ -206,6 +236,13 @@ const importProblems = async (req, res) => {
                                     );
                                 }
                             } else {
+                                const details = detailsMap.get(title);
+                                const rawDifficulty = details?.difficulty || "Easy";
+                                const rawTopic = details?.topicTags?.[0]?.name || "General";
+                                
+                                const difficulty = mapDifficulty(rawDifficulty);
+                                const topic = sanitizeTopic(rawTopic);
+
                                 tasks.push(
                                     new Promise((resolve) => {
                                         db.query(
@@ -214,8 +251,8 @@ const importProblems = async (req, res) => {
                                             VALUES (?, ?, ?, ?, ?, ?)`,
                                             [
                                                 title,
-                                                "Unknown",
-                                                "Unknown",
+                                                difficulty,
+                                                topic,
                                                 "Solved",
                                                 link,
                                                 userId

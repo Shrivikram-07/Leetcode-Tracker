@@ -128,6 +128,23 @@ const leetcodeService = {
             }
         });
     },
+    getProblemDetails: async (titleSlug, bypassCache = false) => {
+        return getCachedOrFetch(`problemDetails:${titleSlug}`, bypassCache, async () => {
+            try {
+                const response = await axiosWithRetry(`${API_BASE_URL}/select?titleSlug=${titleSlug}`);
+                return {
+                    difficulty: response.data?.difficulty || "Easy",
+                    topicTags: response.data?.topicTags || []
+                };
+            } catch (error) {
+                console.error(`[LeetCode Service] Error fetching problem details for ${titleSlug}:`, error.message);
+                return {
+                    difficulty: "Easy",
+                    topicTags: []
+                };
+            }
+        });
+    },
     clearCache: (username) => {
         const keysToClear = [
             `profile:${username}`,

@@ -1,4 +1,5 @@
 import React from "react";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 
 function ProblemCard({ problem, onDelete, onEdit }) {
   const getDifficultyClass = (diff) => {
@@ -18,9 +19,9 @@ function ProblemCard({ problem, onDelete, onEdit }) {
     switch (status) {
       case "Solved":
         return "text-blue-500 bg-blue-500/10 border border-blue-500/20";
-      case "Attempting":
+      case "Attempted":
         return "text-purple-500 bg-purple-500/10 border border-purple-500/20";
-      default: // "To Do"
+      default: // "Not Started"
         return "text-gray-500 bg-gray-500/10 border border-gray-500/20";
     }
   };
@@ -45,17 +46,19 @@ function ProblemCard({ problem, onDelete, onEdit }) {
         <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={() => onEdit(problem)}
-            className="bg-blue-500/10 border border-blue-500/30 text-blue-500 hover:bg-blue-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center"
+            className="bg-blue-500/10 border border-blue-500/20 text-blue-500 hover:bg-blue-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[40px] min-w-[40px] flex items-center justify-center gap-1.5"
             title="Edit Problem"
           >
-            Edit
+            <PencilSquareIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">Edit</span>
           </button>
           <button
             onClick={() => onDelete(problem.id)}
-            className="bg-red-500/10 border border-red-500/30 text-red-500 hover:bg-red-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[48px] min-w-[48px] flex items-center justify-center"
+            className="bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 px-3 py-2 rounded-xl text-xs font-semibold cursor-pointer transition-all duration-200 min-h-[40px] min-w-[40px] flex items-center justify-center gap-1.5"
             title="Delete Problem"
           >
-            Delete
+            <TrashIcon className="w-4 h-4" />
+            <span className="hidden sm:inline">Delete</span>
           </button>
         </div>
       </div>
