@@ -71,6 +71,18 @@ const getProfile = async (req, res) => {
                         leetcodeService.getAcSubmissions(username, 20, bypassCache)
                     ]);
 
+                    let acceptanceRate = 0;
+                    if (solved && solved.acSubmissionNum && solved.totalSubmissionNum) {
+                        const acAll = solved.acSubmissionNum.find(x => x.difficulty === "All")?.submissions || 0;
+                        const totalAll = solved.totalSubmissionNum.find(x => x.difficulty === "All")?.submissions || 0;
+                        if (totalAll > 0) {
+                            acceptanceRate = (acAll / totalAll) * 100;
+                        }
+                    }
+                    if (profile) {
+                        profile.acceptanceRate = acceptanceRate;
+                    }
+
                     res.status(200).json({
                         success: true,
                         data: {
@@ -255,17 +267,37 @@ const changeAccount = async (req, res) => {
             return res.status(404).json({ message: "LeetCode username not found or invalid" });
         }
 
-        // Update database
+        // Get old username to clear cache
         db.query(
-            "UPDATE users SET leetcode_username = ? WHERE id = ?",
-            [leetcode_username, userId],
-            (err, result) => {
+            "SELECT leetcode_username FROM users WHERE id = ?",
+            [userId],
+            (err, selectResult) => {
                 if (err) {
-                    console.error("Change Account DB Error:", err);
+                    console.error("Change Account Select DB Error:", err);
                     return res.status(500).json({ message: "Database Error" });
                 }
 
-                res.status(200).json({ message: "LeetCode username changed successfully!" });
+                const oldUsername = selectResult[0]?.leetcode_username;
+
+                // Update database
+                db.query(
+                    "UPDATE users SET leetcode_username = ? WHERE id = ?",
+                    [leetcode_username, userId],
+                    (err, result) => {
+                        if (err) {
+                            console.error("Change Account DB Error:", err);
+                            return res.status(500).json({ message: "Database Error" });
+                        }
+
+                        // Clear cache for old and new username
+                        if (oldUsername) {
+                            leetcodeService.clearCache(oldUsername);
+                        }
+                        leetcodeService.clearCache(leetcode_username);
+
+                        res.status(200).json({ message: "LeetCode username changed successfully!" });
+                    }
+                );
             }
         );
     } catch (error) {

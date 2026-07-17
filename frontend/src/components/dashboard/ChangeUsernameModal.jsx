@@ -56,8 +56,16 @@ export default function ChangeUsernameModal({ isOpen, onClose }) {
     try {
       await api.put("/leetcode/change", { leetcode_username: trimmed });
       toast.success("Username changed successfully!", { id: toastId });
+      
+      // Remove cached queries so previous profile data is cleared instantly
+      queryClient.removeQueries({ queryKey: ["leetcodeProfile"] });
+      queryClient.removeQueries({ queryKey: ["analytics"] });
+      
+      // Invalidate to trigger a fresh fetch
+      await queryClient.invalidateQueries({ queryKey: ["dashboardUser"] });
       await queryClient.invalidateQueries({ queryKey: ["leetcodeProfile"] });
       await queryClient.invalidateQueries({ queryKey: ["analytics"] });
+      
       setUsername("");
       onClose();
     } catch (err) {

@@ -12,26 +12,45 @@ const createProblem = (req, res) => {
             });
         }
 
-        const sql = `
-            INSERT INTO problems (title, difficulty, topic, status, leetcode_link, notes, user_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        `;
-
         db.query(
-            sql,
-            [title, difficulty, topic, status || "To Do", leetcode_link || null, notes || null, userId],
-            (err, result) => {
+            "SELECT COUNT(*) AS count FROM problems WHERE user_id = ?",
+            [userId],
+            (err, countResult) => {
                 if (err) {
-                    console.log("Create Problem Error:", err);
+                    console.log("Count Problem Error:", err);
                     return res.status(500).json({
                         message: "Database Error"
                     });
                 }
 
-                res.status(201).json({
-                    message: "Problem created successfully",
-                    problemId: result.insertId
-                });
+                if (countResult && countResult[0] && countResult[0].count >= 15) {
+                    return res.status(403).json({
+                        message: "You can only track up to 15 custom problems."
+                    });
+                }
+
+                const sql = `
+                    INSERT INTO problems (title, difficulty, topic, status, leetcode_link, notes, user_id)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                db.query(
+                    sql,
+                    [title, difficulty, topic, status || "To Do", leetcode_link || null, notes || null, userId],
+                    (err, result) => {
+                        if (err) {
+                            console.log("Create Problem Error:", err);
+                            return res.status(500).json({
+                                                            message: "Database Error"
+                            });
+                        }
+
+                        res.status(201).json({
+                            message: "Problem created successfully",
+                            problemId: result.insertId
+                        });
+                    }
+                );
             }
         );
     } catch (error) {

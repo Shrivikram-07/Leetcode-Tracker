@@ -38,6 +38,18 @@ const getAnalytics = async (req, res) => {
                         return res.status(502).json({ message: "Failed to fetch profile stats from LeetCode API" });
                     }
 
+                    let acceptanceRate = 0;
+                    if (solved && solved.acSubmissionNum && solved.totalSubmissionNum) {
+                        const acAll = solved.acSubmissionNum.find(x => x.difficulty === "All")?.submissions || 0;
+                        const totalAll = solved.totalSubmissionNum.find(x => x.difficulty === "All")?.submissions || 0;
+                        if (totalAll > 0) {
+                            acceptanceRate = (acAll / totalAll) * 100;
+                        }
+                    }
+                    if (profile) {
+                        profile.acceptanceRate = acceptanceRate;
+                    }
+
                     // Generate calculations, passing submissionsData as the fourth parameter
                     const analytics = analyticsService.generateAnalytics(
                         profile,

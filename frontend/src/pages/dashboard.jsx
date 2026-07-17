@@ -20,6 +20,7 @@ import QuickActionsCard from "../components/dashboard/QuickActionsCard";
 import ConnectCard from "../components/dashboard/ConnectCard";
 import ChangeUsernameModal from "../components/dashboard/ChangeUsernameModal";
 import ReminderModal from "../components/dashboard/ReminderModal";
+import LimitModal from "../components/dashboard/LimitModal";
 import { SkeletonCard, SkeletonChart } from "../components/dashboard/LoadingSkeleton";
 import AddProblem from "../components/AddProblem";
 import ProblemList from "../components/ProblemList";
@@ -48,6 +49,54 @@ function formatTime12h(timeStr) {
   hours = hours % 12;
   hours = hours ? hours : 12; // the hour '0' should be '12'
   return `${hours}:${minutes} ${ampm}`;
+}
+
+// ─── Helpers for Advanced Reminder ───────────────────────────────────────────
+function getNextReminderOccurrence(reminder) {
+  if (!reminder) return null;
+  const now = new Date();
+  const [hoursStr, minutesStr] = reminder.time.split(":");
+  const hours = parseInt(hoursStr, 10);
+  const minutes = parseInt(minutesStr, 10);
+
+  const matchesFrequency = (date) => {
+    const day = date.getDay();
+    if (reminder.frequency === "Daily") return true;
+    if (reminder.frequency === "Weekdays") return day >= 1 && day <= 5;
+    if (reminder.frequency === "Weekly") {
+      const targetWeeklyDay = reminder.weeklyDay !== undefined ? parseInt(reminder.weeklyDay, 10) : 1;
+      return day === targetWeeklyDay;
+    }
+    if (reminder.frequency === "Custom") {
+      const targetDays = reminder.customDays || [];
+      return targetDays.map(Number).includes(day);
+    }
+    return false;
+  };
+
+  const checkDate = new Date(now.getTime());
+  checkDate.setHours(hours, minutes, 0, 0);
+
+  if (checkDate.getTime() <= now.getTime()) {
+    checkDate.setDate(checkDate.getDate() + 1);
+  }
+
+  for (let i = 0; i < 8; i++) {
+    if (matchesFrequency(checkDate)) {
+      return checkDate;
+    }
+    checkDate.setDate(checkDate.getDate() + 1);
+  }
+  return null;
+}
+
+function formatUpcomingReminder(date) {
+  if (!date) return "No upcoming occurrence";
+  return date.toLocaleDateString("en-US", {
+    weekday: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 // ─── Helper to build stat card definitions ────────────────────────────────────
@@ -121,6 +170,10 @@ export default function Dashboard() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
 
+  const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showReminderPopup, setShowReminderPopup] = useState(false);
+  const [reminderState, setReminderState] = useState(null);
+
   // ── Data queries ────────────────────────────────────────────────────────────
   const {
     data: lcData,
@@ -155,6 +208,125 @@ export default function Dashboard() {
       setReminder(null);
     }
   }, [userId]);
+
+  // Periodic reminder checking interval
+  useEffect(() => {
+    if (!userId || !reminder) {
+      setShowReminderPopup(false);
+      setReminderState(null);
+      return;
+    }
+
+    const checkReminder = () => {
+      const now = new Date();
+      const todayStr = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, '0') + "-" + String(now.getDate()).padStart(2, '0');
+
+      const stateKey = `leetcode_tracker_reminder_state_${userId}`;
+      let localState = null;
+      try {
+        const storedState = localStorage.getItem(stateKey);
+        if (storedState) {
+          localState = JSON.parse(storedState);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (!localState || localState.date !== todayStr) {
+        localState = {
+          date: todayStr,
+          status: "pending",
+          snoozedUntil: null
+        };
+        localStorage.setItem(stateKey, JSON.stringify(localState));
+      }
+
+      setReminderState(localState);
+
+      // Check frequency match
+      const day = now.getDay();
+      let frequencyMatches = false;
+      if (reminder.frequency === "Daily") {
+        frequencyMatches = true;
+      } else if (reminder.frequency === "Weekdays") {
+        frequencyMatches = day >= 1 && day <= 5;
+      } else if (reminder.frequency === "Weekly") {
+        const targetWeeklyDay = reminder.weeklyDay !== undefined ? parseInt(reminder.weeklyDay, 10) : 1;
+        frequencyMatches = day === targetWeeklyDay;
+      } else if (reminder.frequency === "Custom") {
+        const targetDays = reminder.customDays || [];
+        frequencyMatches = targetDays.map(Number).includes(day);
+      }
+
+      if (!frequencyMatches) return;
+
+      // Check if current time is past reminder time
+      const [hoursStr, minutesStr] = reminder.time.split(":");
+      const hours = parseInt(hoursStr, 10);
+      const minutes = parseInt(minutesStr, 10);
+      const targetTime = new Date(now.getTime());
+      targetTime.setHours(hours, minutes, 0, 0);
+
+      if (now.getTime() >= targetTime.getTime()) {
+        if (localState.status === "pending") {
+          setShowReminderPopup(true);
+        } else if (localState.status === "snoozed" && localState.snoozedUntil) {
+          if (now.getTime() >= localState.snoozedUntil) {
+            setShowReminderPopup(true);
+          }
+        }
+      }
+    };
+
+    checkReminder();
+    const interval = setInterval(checkReminder, 5000);
+    return () => clearInterval(interval);
+  }, [userId, reminder]);
+
+  const handleDismissReminder = () => {
+    setShowReminderPopup(false);
+    if (!userId) return;
+    const stateKey = `leetcode_tracker_reminder_state_${userId}`;
+    const newState = {
+      ...reminderState,
+      status: "dismissed",
+      snoozedUntil: null
+    };
+    localStorage.setItem(stateKey, JSON.stringify(newState));
+    setReminderState(newState);
+    toast.success("Reminder dismissed.");
+  };
+
+  const handleCompleteReminder = () => {
+    setShowReminderPopup(false);
+    if (!userId) return;
+    const stateKey = `leetcode_tracker_reminder_state_${userId}`;
+    const newState = {
+      ...reminderState,
+      status: "completed",
+      snoozedUntil: null
+    };
+    localStorage.setItem(stateKey, JSON.stringify(newState));
+    setReminderState(newState);
+    toast.success("Awesome! LeetCode task marked completed today!", {
+      icon: "🎉",
+    });
+  };
+
+  const handleSnoozeReminder = () => {
+    setShowReminderPopup(false);
+    if (!userId) return;
+    const stateKey = `leetcode_tracker_reminder_state_${userId}`;
+    const snoozeTime = Date.now() + 30 * 60 * 1000;
+    const newState = {
+      ...reminderState,
+      status: "snoozed",
+      snoozedUntil: snoozeTime
+    };
+    localStorage.setItem(stateKey, JSON.stringify(newState));
+    setReminderState(newState);
+    toast.success("Snoozed for 30 minutes.");
+  };
 
   // ── Auth guard ──────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -327,42 +499,99 @@ export default function Dashboard() {
           </div>
 
           {/* ── Reminder Banner/Card ────────────────────────────────────────── */}
-          <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-lg flex-shrink-0">
-                🔔
-              </div>
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text)]">LeetCode Reminder</p>
-                <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-sm font-extrabold text-[var(--text-h)] flex items-center gap-2">
-                    {reminder ? (
-                      <>
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
-                        🟢 {reminder.frequency} • {formatTime12h(reminder.time)}
-                      </>
-                    ) : (
-                      <>
-                        <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />
-                        ⚪ No Reminder Configured
-                      </>
-                    )}
-                  </span>
+          {reminder ? (
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5 space-y-4 text-left animate-slide-up">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--border)] pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-base shadow-md shadow-violet-500/20">
+                    🔔
+                  </div>
+                  <h3 className="text-sm font-bold text-[var(--text-h)]">
+                    {reminder.title || "LeetCode Reminder"}
+                  </h3>
                 </div>
-                {reminder && (
-                  <p className="text-xs text-[var(--text)] italic mt-1 leading-normal truncate max-w-lg">
-                    "{reminder.message}"
+                <div className="flex items-center gap-3">
+                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                    reminderState?.status === "completed" ? "bg-emerald-500/10 text-emerald-500" :
+                    reminderState?.status === "snoozed" ? "bg-amber-500/10 text-amber-500" :
+                    reminderState?.status === "dismissed" ? "bg-red-500/10 text-red-500" :
+                    "bg-blue-500/10 text-blue-500 animate-pulse"
+                  }`}>
+                    {reminderState?.status === "completed" ? "Completed Today" :
+                     reminderState?.status === "snoozed" ? `Snoozed until ${new Date(reminderState.snoozedUntil).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}` :
+                     reminderState?.status === "dismissed" ? "Dismissed" :
+                     "Pending Today"}
+                  </span>
+                  
+                  {reminderState?.status !== "completed" && (
+                    <button
+                      onClick={handleCompleteReminder}
+                      className="px-3 py-1 rounded-lg bg-emerald-500 text-white text-xs font-semibold hover:bg-emerald-600 transition-colors duration-200"
+                    >
+                      ✓ Complete
+                    </button>
+                  )}
+
+                  <button
+                    onClick={() => setReminderModalOpen(true)}
+                    className="px-3 py-1 rounded-lg border border-[var(--border)] text-[var(--text-h)] text-xs font-semibold hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors duration-200 bg-[var(--bg)]"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-0.5">Subject</p>
+                  <p className="text-xs font-semibold text-[var(--text-h)] truncate">{reminder.subject || "Time to solve today's LeetCode problems!"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-0.5">Description</p>
+                  <p className="text-xs text-[var(--text)] truncate">{reminder.description || "Keep the streak alive and stay interview ready."}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-0.5">Time & Frequency</p>
+                  <p className="text-xs font-semibold text-[var(--text-h)]">
+                    {formatTime12h(reminder.time)} • {reminder.frequency}
+                    {reminder.frequency === "Custom" && ` (${(reminder.customDays || []).map(d => ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][d]).join(", ")})`}
+                    {reminder.frequency === "Weekly" && ` (every ${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][reminder.weeklyDay]})`}
                   </p>
-                )}
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--text)] mb-0.5">Upcoming reminder</p>
+                  <p className="text-xs font-semibold text-[var(--text-h)]">
+                    {formatUpcomingReminder(getNextReminderOccurrence(reminder))}
+                  </p>
+                </div>
               </div>
             </div>
-            <button
-              onClick={() => setReminderModalOpen(true)}
-              className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200 shadow-sm active:scale-[0.98] w-full sm:w-auto flex-shrink-0"
-            >
-              {reminder ? "Edit Reminder" : "Set Reminder"}
-            </button>
-          </div>
+          ) : (
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-[var(--accent-bg)] border border-[var(--accent-border)] flex items-center justify-center text-lg flex-shrink-0">
+                  🔔
+                </div>
+                <div className="min-w-0 text-left">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--text)]">LeetCode Reminder</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-sm font-extrabold text-[var(--text-h)] flex items-center gap-2">
+                      <span className="w-2.5 h-2.5 rounded-full bg-gray-400 inline-block" />
+                      ⚪ No Reminder Configured
+                    </span>
+                  </div>
+                  <p className="text-xs text-[var(--text)] mt-1 leading-normal">
+                    Set a custom daily, weekly, or weekday reminder to practice LeetCode problems.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setReminderModalOpen(true)}
+                className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[var(--bg)] border border-[var(--border)] text-[var(--text-h)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-200 shadow-sm active:scale-[0.98] w-full sm:w-auto flex-shrink-0"
+              >
+                Set Reminder
+              </button>
+            </div>
+          )}
 
           {/* ── Tabs Navigation ──────────────────────────────────────────────── */}
           <div className="flex border-b border-[var(--border)] gap-6">
@@ -465,13 +694,15 @@ export default function Dashboard() {
 
       {/* ── Problem Tracker (always shown when logged in) ──────────────────── */}
       {!lcLoading && (
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-4 animate-slide-up">
           {/* Add Problem */}
           <div className="rounded-2xl border border-[var(--border)] bg-[var(--code-bg)] p-5">
             <AddProblem
               onProblemAdded={refetchProblems}
               editingProblem={editingProblem}
               setEditingProblem={setEditingProblem}
+              problemCount={problems.length}
+              onShowLimitModal={() => setShowLimitModal(true)}
             />
           </div>
 
@@ -548,6 +779,73 @@ export default function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* ── Limit Modal (Premium check) ─────────────────────────────────── */}
+      <LimitModal
+        isOpen={showLimitModal}
+        onClose={() => setShowLimitModal(false)}
+      />
+
+      {/* ── Reminder Popup Alert ────────────────────────────────────────── */}
+      <AnimatePresence>
+        {showReminderPopup && reminder && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[200] pointer-events-auto"
+            />
+            {/* Popup */}
+            <div className="fixed inset-0 z-[201] flex items-center justify-center p-4 pointer-events-none">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                transition={{ type: "spring", damping: 25, stiffness: 250 }}
+                className="pointer-events-auto w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl p-6 flex flex-col text-center"
+              >
+                <div className="mx-auto w-16 h-16 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-3xl shadow-lg shadow-violet-500/20 mb-4 animate-bounce">
+                  🔔
+                </div>
+                <h3 className="text-xl font-extrabold text-[var(--text-h)] mb-1">
+                  {reminder.title || "LeetCode Reminder"}
+                </h3>
+                <p className="text-sm font-semibold text-[var(--accent)] uppercase tracking-wider mb-3">
+                  {reminder.subject || "Time to solve today's LeetCode problems!"}
+                </p>
+                <p className="text-sm text-[var(--text)] leading-relaxed mb-6">
+                  {reminder.description || "Keep the streak alive and stay interview ready."}
+                </p>
+
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handleCompleteReminder}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-500 to-purple-600 text-white font-bold text-base hover:shadow-lg hover:shadow-violet-500/20 transition-all duration-200 active:scale-[0.98]"
+                  >
+                    Mark Completed
+                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSnoozeReminder}
+                      className="flex-1 py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-[var(--text-h)] hover:bg-[var(--code-bg)] transition-all duration-200"
+                    >
+                      Snooze 30 Min
+                    </button>
+                    <button
+                      onClick={handleDismissReminder}
+                      className="flex-1 py-3 rounded-xl border border-[var(--border)] text-sm font-semibold text-red-500 hover:bg-red-500/10 transition-all duration-200"
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </>
+        )}
+      </AnimatePresence>
     </DashboardLayout>
   );
 }

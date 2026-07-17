@@ -31,9 +31,13 @@ export default function Sidebar({ theme, onToggleTheme, onLogout, isOpen, onClos
         transition-transform
         duration-300
         ease-in-out
-        lg:static
-        lg:translate-x-0
+        lg:fixed
+        lg:top-0
+        lg:left-0
+        lg:h-screen
         lg:w-60
+        lg:z-40
+        lg:translate-x-0
         lg:max-w-none
         ${isOpen ? "translate-x-0" : "-translate-x-full"}
       `}

@@ -127,6 +127,21 @@ const leetcodeService = {
                 throw error;
             }
         });
+    },
+    clearCache: (username) => {
+        const keysToClear = [
+            `profile:${username}`,
+            `solved:${username}`,
+            `contest:${username}`,
+            `contestHistory:${username}`,
+            `skill:${username}`
+        ];
+        for (const key of cache.keys()) {
+            if (key.startsWith(`acSubmissions:${username}:`) || keysToClear.includes(key)) {
+                cache.delete(key);
+            }
+        }
+        console.log(`[Cache Cleared] For username: ${username}`);
     }
 };
 

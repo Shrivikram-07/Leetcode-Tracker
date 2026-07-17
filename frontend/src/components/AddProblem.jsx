@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import api from "../api";
 
-function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
+function AddProblem({ onProblemAdded, editingProblem, setEditingProblem, problemCount = 0, onShowLimitModal }) {
   const [title, setTitle] = useState("");
   const [difficulty, setDifficulty] = useState("Easy");
   const [topic, setTopic] = useState("");
@@ -38,6 +38,16 @@ function AddProblem({ onProblemAdded, editingProblem, setEditingProblem }) {
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
+
+    if (!editingProblem && problemCount >= 15) {
+      if (onShowLimitModal) {
+        onShowLimitModal();
+      } else {
+        setError("You can only track up to 15 custom problems.");
+      }
+      setIsSubmitting(false);
+      return;
+    }
 
     if (!title || !difficulty || !topic) {
       setError("Title, difficulty, and topic are required.");
