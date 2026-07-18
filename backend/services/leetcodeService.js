@@ -5,6 +5,7 @@ const API_BASE_URL = process.env.LEETCODE_API_BASE_URL || "https://alfa-leetcode
 // Server-side cache in-memory Map
 const cache = new Map();
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+const pendingRequests = new Map();
 
 // Axios wrapper with retry capability and exponential backoff
 const axiosWithRetry = async (url, options = {}, retries = 3, backoff = 1000) => {
@@ -19,7 +20,8 @@ const axiosWithRetry = async (url, options = {}, retries = 3, backoff = 1000) =>
         const status = error.response?.status;
         console.error(`[LeetCode API Call] ERROR - URL: ${url} - Status: ${status || 'network error'} - Message: ${error.message} - Time: ${duration}ms`);
         
-        const isTransient = status === 429 || (status >= 500 && status <= 504) || !status;
+        // Do not retry on 429 Too Many Requests
+        const isTransient = (status >= 500 && status <= 504) || !status;
         if (isTransient && retries > 0) {
             console.warn(`[Retry] Transient failure on ${url} (${status || 'network error'}). Retrying in ${backoff}ms... (${retries} retries left)`);
             await new Promise(resolve => setTimeout(resolve, backoff));
@@ -29,7 +31,7 @@ const axiosWithRetry = async (url, options = {}, retries = 3, backoff = 1000) =>
     }
 };
 
-// Caching helper
+// Caching helper with concurrent request coalescing
 const getCachedOrFetch = async (cacheKey, bypassCache, fetchFn) => {
     const now = Date.now();
     const cached = cache.get(cacheKey);
@@ -39,16 +41,28 @@ const getCachedOrFetch = async (cacheKey, bypassCache, fetchFn) => {
         return cached.data;
     }
     
-    console.log(`[Cache Miss/Expired/Bypassed] Key: ${cacheKey}. Fetching new data...`);
-    const data = await fetchFn();
-    
-    if (data !== null) {
-        cache.set(cacheKey, {
-            timestamp: now,
-            data: data
-        });
+    if (pendingRequests.has(cacheKey)) {
+        console.log(`[Cache Pending request joined] Key: ${cacheKey}`);
+        return pendingRequests.get(cacheKey);
     }
-    return data;
+    
+    console.log(`[Cache Miss/Expired/Bypassed] Key: ${cacheKey}. Fetching new data...`);
+    const promise = fetchFn().then(data => {
+        pendingRequests.delete(cacheKey);
+        if (data !== null) {
+            cache.set(cacheKey, {
+                timestamp: Date.now(),
+                data: data
+            });
+        }
+        return data;
+    }).catch(err => {
+        pendingRequests.delete(cacheKey);
+        throw err;
+    });
+    
+    pendingRequests.set(cacheKey, promise);
+    return promise;
 };
 
 const leetcodeService = {

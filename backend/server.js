@@ -57,9 +57,9 @@ const authLimiter = rateLimit({
 
 // Relaxed rate limiter for dashboard/API routes
 const apiLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minute
-    max: 300,
-    message: { message: "Too many requests, please try again after a minute" },
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100,
+    message: { message: "Too many requests, please try again after 15 minutes" },
     standardHeaders: true,
     legacyHeaders: false,
     skip: (req) => {
@@ -68,7 +68,19 @@ const apiLimiter = rateLimit({
         
         // Skip auth routes as they have their own strict limiter
         const path = req.originalUrl.split("?")[0];
-        return path === "/api/users/login" || path === "/api/users/register";
+        if (path === "/api/users/login" || path === "/api/users/register") return true;
+
+        // Skip safe GET requests that can be served from cache
+        if (req.method === "GET" && (
+            path === "/api/leetcode/profile" ||
+            path === "/api/problems" ||
+            path === "/api/users/dashboard" ||
+            path === "/api/users/profile" ||
+            path === "/api/analytics"
+        )) {
+            return true;
+        }
+        return false;
     }
 });
 
